@@ -5,23 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello World</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             height: 100vh;
-            margin: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: Arial, sans-serif;
         }
-        h1 {
+        header {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid white;
+        }
+        header h1 {
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        main h1 {
             color: white;
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
+        footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-top: 2px solid white;
+            color: white;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <header>
+        <h1>My Website</h1>
+    </header>
+    <main>
+        <h1>Hello World</h1>
+    </main>
+    <footer>
+        <p>&copy; 2026 Hello World. All rights reserved.</p>
+        <p>Author: Anish Mahajan</p>
+    </footer>
 </body>
 </html>
