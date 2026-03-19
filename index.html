@@ -10,12 +10,22 @@
             padding: 0;
             box-sizing: border-box;
         }
+        @keyframes waveFlow {
+            0% {
+                background-position: 0% center;
+            }
+            100% {
+                background-position: 200% center;
+            }
+        }
         body {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: linear-gradient(135deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
-            font-family: Algerian, sans-serif;
+            background: linear-gradient(90deg, #FF0000 0%, #FF7F00 12%, #FFFF00 24%, #00FF00 36%, #0000FF 48%, #4B0082 60%, #9400D3 72%, #FF0000 84%, #FF7F00 100%);
+            background-size: 200% 100%;
+            font-family: Georgia, serif;
+            animation: waveFlow 6s linear infinite;
         }
         header {
             background-color: rgba(0, 0, 0, 0.2);
