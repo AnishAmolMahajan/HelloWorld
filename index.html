@@ -10,12 +10,30 @@
             padding: 0;
             box-sizing: border-box;
         }
+        @keyframes rainbowShift {
+            0% {
+                background: linear-gradient(135deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
+            }
+            25% {
+                background: linear-gradient(225deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
+            }
+            50% {
+                background: linear-gradient(315deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
+            }
+            75% {
+                background: linear-gradient(45deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
+            }
+            100% {
+                background: linear-gradient(135deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
+            }
+        }
         body {
             display: flex;
             flex-direction: column;
             height: 100vh;
             background: linear-gradient(135deg, #FF0000 0%, #FF7F00 16%, #FFFF00 32%, #00FF00 48%, #0000FF 64%, #4B0082 80%, #9400D3 100%);
             font-family: Arial, sans-serif;
+            animation: rainbowShift 8s ease-in-out infinite;
         }
         header {
             background-color: rgba(0, 0, 0, 0.2);
