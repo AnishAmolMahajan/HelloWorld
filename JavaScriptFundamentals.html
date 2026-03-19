@@ -94,6 +94,74 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: #FFD700;
         }
+        .quiz-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            max-width: 700px;
+            width: 100%;
+        }
+        .quiz-section h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .quiz-question {
+            margin-bottom: 20px;
+            display: none;
+        }
+        .quiz-question.active {
+            display: block;
+        }
+        .quiz-question p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .quiz-options {
+            text-align: left;
+        }
+        .quiz-options label {
+            display: block;
+            margin: 10px 0;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .quiz-options input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .quiz-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .quiz-buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            background-color: #FFD700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quiz-buttons button:hover {
+            background-color: #FFC700;
+            transform: scale(1.05);
+        }
+        .quiz-result {
+            display: none;
+            text-align: center;
+            color: white;
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+        .quiz-result.show {
+            display: block;
+        }
         footer {
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
@@ -112,6 +180,128 @@
         <h1>JavaScript Fundamentals</h1>
         <p><strong>Key Facts about JavaScript:</strong><br><br>
         JavaScript is a lightweight, dynamically-typed language that powers interactive web experiences. As a first-class object language, functions can be passed as arguments and used to create closures. Mastering variables, objects, and arrays are essential for effective programming. The DOM and asynchronous programming with Promises enable powerful interactions and responsive applications.</p>
+        
+        <div class="quiz-section">
+            <h2>Test Your Knowledge!</h2>
+            
+            <div class="quiz-question active">
+                <p><strong>Q1: What type of language is JavaScript?</strong></p>
+                <div class="quiz-options">
+                    <label><input type="radio" name="q1"> Compiled language</label>
+                    <label><input type="radio" name="q1"> Dynamically-typed language</label>
+                    <label><input type="radio" name="q1"> Statically-typed language</label>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p><strong>Q2: Can functions be passed as arguments in JavaScript?</strong></p>
+                <div class="quiz-options">
+                    <label><input type="radio" name="q2"> No, never</label>
+                    <label><input type="radio" name="q2"> Yes, functions are first-class objects</label>
+                    <label><input type="radio" name="q2"> Only in specific cases</label>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p><strong>Q3: What does the DOM stand for?</strong></p>
+                <div class="quiz-options">
+                    <label><input type="radio" name="q3"> Dynamic Object Management</label>
+                    <label><input type="radio" name="q3"> Document Object Model</label>
+                    <label><input type="radio" name="q3"> Data Object Module</label>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p><strong>Q4: Which of these is used for handling asynchronous operations?</strong></p>
+                <div class="quiz-options">
+                    <label><input type="radio" name="q4"> Events</label>
+                    <label><input type="radio" name="q4"> Callbacks</label>
+                    <label><input type="radio" name="q4"> Promises</label>
+                </div>
+            </div>
+
+            <div class="quiz-result"></div>
+
+            <div class="quiz-buttons">
+                <button id="nextBtn">Next</button>
+                <button id="submitBtn" style="display: none;">Submit</button>
+                <button id="restartBtn" style="display: none;">Restart Quiz</button>
+            </div>
+        </div>
+
+        <script>
+            let currentQuestion = 0;
+            const answers = ['q1_2', 'q2_2', 'q3_2', 'q4_3'];
+            const userAnswers = ['', '', '', ''];
+
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const quizResult = document.querySelector('.quiz-result');
+            const quizQuestions = document.querySelectorAll('.quiz-question');
+
+            function showQuestion(n) {
+                quizQuestions.forEach(q => q.classList.remove('active'));
+                quizQuestions[n].classList.add('active');
+                
+                if (n === quizQuestions.length - 1) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'inline-block';
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                    submitBtn.style.display = 'none';
+                }
+            }
+
+            nextBtn.addEventListener('click', () => {
+                const selectedOption = document.querySelector(`input[name="q${currentQuestion + 1}"]:checked`);
+                if (!selectedOption) {
+                    alert('Please select an answer!');
+                    return;
+                }
+                userAnswers[currentQuestion] = selectedOption.value;
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            });
+
+            submitBtn.addEventListener('click', () => {
+                const selectedOption = document.querySelector(`input[name="q${currentQuestion + 1}"]:checked`);
+                if (!selectedOption) {
+                    alert('Please select an answer!');
+                    return;
+                }
+                userAnswers[currentQuestion] = selectedOption.value;
+                calculateScore();
+            });
+
+            restartBtn.addEventListener('click', () => {
+                currentQuestion = 0;
+                userAnswers.fill('');
+                quizResult.classList.remove('show');
+                quizResult.innerHTML = '';
+                document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+                showQuestion(0);
+                restartBtn.style.display = 'none';
+                nextBtn.style.display = 'inline-block';
+            });
+
+            function calculateScore() {
+                let score = 0;
+                for (let i = 0; i < answers.length; i++) {
+                    if (userAnswers[i] === answers[i]) {
+                        score++;
+                    }
+                }
+                const percentage = (score / answers.length) * 100;
+                quizResult.innerHTML = `<p>Your Score: ${score}/${answers.length} (${percentage.toFixed(0)}%)</p>`;
+                quizResult.classList.add('show');
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+            }
+
+            showQuestion(0);
+        </script>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
         </div>
