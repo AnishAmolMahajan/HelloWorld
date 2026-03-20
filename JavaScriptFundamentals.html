@@ -25,7 +25,7 @@
         body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(135deg, 
                 #FF0000 0%, 
                 #FF7F00 8%, 
@@ -60,23 +60,31 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
         main h1 {
             color: white;
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        main p {
+        .content-card {
+            width: min(900px, 100%);
+            margin-top: 24px;
+            padding: 28px;
+            border-radius: 18px;
+            background-color: rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+        .points-paragraph {
             color: white;
-            font-size: 1.2em;
-            text-align: center;
             margin-top: 20px;
-            padding: 20px;
-            max-width: 600px;
+            font-size: 1.15em;
+            text-align: left;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-            line-height: 1.6;
+            line-height: 1.8;
         }
         .back-link {
             margin-top: 30px;
@@ -95,72 +103,69 @@
             color: #FFD700;
         }
         .quiz-section {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            max-width: 700px;
-            width: 100%;
+            margin-top: 32px;
+            color: white;
         }
         .quiz-section h2 {
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            margin-bottom: 12px;
+            font-size: 1.6em;
+        }
+        .quiz-section p {
+            line-height: 1.6;
         }
         .quiz-question {
-            margin-bottom: 20px;
-            display: none;
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.12);
         }
-        .quiz-question.active {
-            display: block;
+        .quiz-question h3 {
+            margin-bottom: 12px;
+            font-size: 1.05em;
         }
-        .quiz-question p {
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .quiz-options {
-            text-align: left;
-        }
-        .quiz-options label {
+        .quiz-option {
             display: block;
             margin: 10px 0;
-            color: white;
-            font-size: 1em;
             cursor: pointer;
         }
-        .quiz-options input[type="radio"] {
+        .quiz-option input {
             margin-right: 10px;
-            cursor: pointer;
         }
-        .quiz-buttons {
-            text-align: center;
-            margin-top: 20px;
+        .quiz-actions {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .quiz-buttons button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            background-color: #FFD700;
+        .quiz-button {
             border: none;
-            border-radius: 5px;
+            border-radius: 999px;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: 1em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .quiz-buttons button:hover {
-            background-color: #FFC700;
-            transform: scale(1.05);
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .primary-button {
+            background-color: #ffffff;
+            color: #222222;
+        }
+        .secondary-button {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         .quiz-result {
-            display: none;
-            text-align: center;
-            color: white;
-            font-size: 1.3em;
             margin-top: 20px;
-        }
-        .quiz-result.show {
-            display: block;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(0, 0, 0, 0.18);
+            font-size: 1.05em;
+            line-height: 1.6;
         }
         footer {
             background-color: rgba(0, 0, 0, 0.2);
@@ -170,6 +175,18 @@
             color: white;
             font-size: 0.9em;
         }
+        @media (max-width: 640px) {
+            main h1 {
+                font-size: 2.3em;
+                text-align: center;
+            }
+            .content-card {
+                padding: 20px;
+            }
+            .points-paragraph {
+                font-size: 1.02em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -178,135 +195,101 @@
     </header>
     <main>
         <h1>JavaScript Fundamentals</h1>
-        <p><strong>Key Facts about JavaScript:</strong><br><br>
-        JavaScript is a lightweight, dynamically-typed language that powers interactive web experiences. As a first-class object language, functions can be passed as arguments and used to create closures. Mastering variables, objects, and arrays are essential for effective programming. The DOM and asynchronous programming with Promises enable powerful interactions and responsive applications.</p>
-        
-        <div class="quiz-section">
-            <h2>Test Your Knowledge!</h2>
-            
-            <div class="quiz-question active">
-                <p><strong>Q1: What type of language is JavaScript?</strong></p>
-                <div class="quiz-options">
-                    <label><input type="radio" name="q1" value="q1_1"> Compiled language</label>
-                    <label><input type="radio" name="q1" value="q1_2"> Dynamically-typed language</label>
-                    <label><input type="radio" name="q1" value="q1_3"> Statically-typed language</label>
-                </div>
-            </div>
+        <section class="content-card">
+            <p class="points-paragraph">JavaScript is a lightweight, dynamically typed language that powers interactive web experiences in the browser. It treats functions as first-class values, which means they can be passed as arguments, returned from other functions, and used to build closures. Understanding variables, objects, and arrays is essential because they form the foundation of most application logic. JavaScript also works closely with the DOM to update page content and uses asynchronous tools such as Promises to handle operations that do not finish immediately, helping applications stay responsive.</p>
 
-            <div class="quiz-question">
-                <p><strong>Q2: Can functions be passed as arguments in JavaScript?</strong></p>
-                <div class="quiz-options">
-                    <label><input type="radio" name="q2" value="q2_1"> No, never</label>
-                    <label><input type="radio" name="q2" value="q2_2"> Yes, functions are first-class objects</label>
-                    <label><input type="radio" name="q2" value="q2_3"> Only in specific cases</label>
-                </div>
-            </div>
+            <section class="quiz-section" aria-labelledby="javascript-quiz-title">
+                <h2 id="javascript-quiz-title">Quick JavaScript Quiz</h2>
+                <p>Choose the best answer for each question, then click Calculate Score.</p>
 
-            <div class="quiz-question">
-                <p><strong>Q3: What does the DOM stand for?</strong></p>
-                <div class="quiz-options">
-                    <label><input type="radio" name="q3" value="q3_1"> Dynamic Object Management</label>
-                    <label><input type="radio" name="q3" value="q3_2"> Document Object Model</label>
-                    <label><input type="radio" name="q3" value="q3_3"> Data Object Module</label>
-                </div>
-            </div>
+                <form id="javascript-quiz-form">
+                    <div class="quiz-question">
+                        <h3>1. What type of language is JavaScript?</h3>
+                        <label class="quiz-option"><input type="radio" name="question1" value="A"> A. Compiled language</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="B"> B. Dynamically typed language</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="C"> C. Statically typed language</label>
+                    </div>
 
-            <div class="quiz-question">
-                <p><strong>Q4: Which of these is used for handling asynchronous operations?</strong></p>
-                <div class="quiz-options">
-                    <label><input type="radio" name="q4" value="q4_1"> Events</label>
-                    <label><input type="radio" name="q4" value="q4_2"> Callbacks</label>
-                    <label><input type="radio" name="q4" value="q4_3"> Promises</label>
-                </div>
-            </div>
+                    <div class="quiz-question">
+                        <h3>2. What does it mean that functions are first-class in JavaScript?</h3>
+                        <label class="quiz-option"><input type="radio" name="question2" value="A"> A. They can be passed as arguments and returned from functions</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="B"> B. They only work inside loops</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="C"> C. They cannot be stored in variables</label>
+                    </div>
 
-            <div class="quiz-result"></div>
+                    <div class="quiz-question">
+                        <h3>3. What does DOM stand for?</h3>
+                        <label class="quiz-option"><input type="radio" name="question3" value="A"> A. Dynamic Object Management</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="B"> B. Document Object Model</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="C"> C. Data Object Module</label>
+                    </div>
 
-            <div class="quiz-buttons">
-                <button id="nextBtn">Next</button>
-                <button id="submitBtn" style="display: none;">Submit</button>
-                <button id="restartBtn" style="display: none;">Restart Quiz</button>
-            </div>
-        </div>
+                    <div class="quiz-question">
+                        <h3>4. Which JavaScript feature is commonly used for asynchronous operations?</h3>
+                        <label class="quiz-option"><input type="radio" name="question4" value="A"> A. Borders</label>
+                        <label class="quiz-option"><input type="radio" name="question4" value="B"> B. Promises</label>
+                        <label class="quiz-option"><input type="radio" name="question4" value="C"> C. Headings</label>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button type="button" class="quiz-button primary-button" id="calculate-score">Calculate Score</button>
+                        <button type="reset" class="quiz-button secondary-button" id="reset-quiz">Reset Quiz</button>
+                    </div>
+                </form>
+
+                <div class="quiz-result" id="quiz-result" aria-live="polite">Your score will appear here after you submit the quiz.</div>
+            </section>
+        </section>
 
         <script>
-            let currentQuestion = 0;
-            const answers = ['q1_2', 'q2_2', 'q3_2', 'q4_3'];
-            const userAnswers = ['', '', '', ''];
+            const quizForm = document.getElementById('javascript-quiz-form');
+            const calculateButton = document.getElementById('calculate-score');
+            const resetButton = document.getElementById('reset-quiz');
+            const quizResult = document.getElementById('quiz-result');
 
-            const nextBtn = document.getElementById('nextBtn');
-            const submitBtn = document.getElementById('submitBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            const quizResult = document.querySelector('.quiz-result');
-            const quizQuestions = document.querySelectorAll('.quiz-question');
+            const correctAnswers = {
+                question1: 'B',
+                question2: 'A',
+                question3: 'B',
+                question4: 'B'
+            };
 
-            function showQuestion(n) {
-                quizQuestions.forEach(q => q.classList.remove('active'));
-                quizQuestions[n].classList.add('active');
-                
-                if (n === quizQuestions.length - 1) {
-                    nextBtn.style.display = 'none';
-                    submitBtn.style.display = 'inline-block';
-                } else {
-                    nextBtn.style.display = 'inline-block';
-                    submitBtn.style.display = 'none';
-                }
-            }
-
-            nextBtn.addEventListener('click', () => {
-                const selectedOption = document.querySelector(`input[name="q${currentQuestion + 1}"]:checked`);
-                if (!selectedOption) {
-                    alert('Please select an answer!');
-                    return;
-                }
-                userAnswers[currentQuestion] = selectedOption.value;
-                currentQuestion++;
-                showQuestion(currentQuestion);
-            });
-
-            submitBtn.addEventListener('click', () => {
-                const selectedOption = document.querySelector(`input[name="q${currentQuestion + 1}"]:checked`);
-                if (!selectedOption) {
-                    alert('Please select an answer!');
-                    return;
-                }
-                userAnswers[currentQuestion] = selectedOption.value;
-                calculateScore();
-            });
-
-            restartBtn.addEventListener('click', () => {
-                currentQuestion = 0;
-                userAnswers.fill('');
-                quizResult.classList.remove('show');
-                quizResult.innerHTML = '';
-                document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
-                showQuestion(0);
-                restartBtn.style.display = 'none';
-                nextBtn.style.display = 'inline-block';
-            });
-
-            function calculateScore() {
+            calculateButton.addEventListener('click', function () {
+                const formData = new FormData(quizForm);
                 let score = 0;
-                for (let i = 0; i < answers.length; i++) {
-                    if (userAnswers[i] === answers[i]) {
-                        score++;
-                    }
-                }
-                const percentage = (score / answers.length) * 100;
-                quizResult.innerHTML = `<p>Your Score: ${score}/${answers.length} (${percentage.toFixed(0)}%)</p>`;
-                quizResult.classList.add('show');
-                nextBtn.style.display = 'none';
-                submitBtn.style.display = 'none';
-                restartBtn.style.display = 'inline-block';
-            }
+                const totalQuestions = Object.keys(correctAnswers).length;
 
-            showQuestion(0);
+                Object.entries(correctAnswers).forEach(function ([questionName, answer]) {
+                    if (formData.get(questionName) === answer) {
+                        score += 1;
+                    }
+                });
+
+                const answeredQuestions = Object.keys(correctAnswers).filter(function (questionName) {
+                    return formData.get(questionName) !== null;
+                }).length;
+
+                if (answeredQuestions < totalQuestions) {
+                    quizResult.textContent = 'Please answer all questions before calculating your score.';
+                    return;
+                }
+
+                quizResult.textContent = 'You scored ' + score + ' out of ' + totalQuestions + '. ' + (score === totalQuestions
+                    ? 'Excellent work.'
+                    : score >= 3
+                        ? 'Good job. Review the paragraph above and try again for a perfect score.'
+                        : 'Keep practicing. Read the JavaScript paragraph above and try again.');
+            });
+
+            resetButton.addEventListener('click', function () {
+                quizResult.textContent = 'Your score will appear here after you submit the quiz.';
+            });
         </script>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
         </div>
     </main>
-    <footer>Explore my JavaScript Fundamentals repository! Here I dive deep into JavaScri
+    <footer>
         <p>&copy; 2026 Hello World. All rights reserved.</p>
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
