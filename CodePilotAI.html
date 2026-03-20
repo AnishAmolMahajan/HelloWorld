@@ -84,6 +84,40 @@
             line-height: 1.7;
             font-size: 1.05em;
         }
+        .api-panel {
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .api-panel p {
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .api-fields {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 10px;
+        }
+        .api-fields input {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-family: inherit;
+            font-size: 0.95em;
+            color: white;
+            background: rgba(0, 0, 0, 0.22);
+        }
+        .api-fields input::placeholder {
+            color: rgba(255, 255, 255, 0.75);
+        }
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.92em;
+            color: #fff7c2;
+        }
         .prompt-row {
             margin-top: 16px;
             display: flex;
@@ -123,14 +157,6 @@
         .assistant-message {
             background: rgba(0, 0, 0, 0.2);
             color: white;
-        }
-        .assistant-message pre {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.22);
-            overflow-x: auto;
-            font-size: 0.92em;
         }
         .chat-form {
             margin-top: 14px;
@@ -205,6 +231,9 @@
             .chat-card {
                 padding: 16px;
             }
+            .api-fields {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -215,7 +244,16 @@
     <main>
         <h1>CodePilot AI</h1>
         <section class="chat-card">
-            <p class="intro-text">Ask coding questions, school questions, general knowledge questions, or creative prompts. This page simulates a browser-based assistant that can help with both programming and everyday topics.</p>
+            <p class="intro-text">Ask coding questions, school questions, general knowledge questions, or creative prompts. This page now uses live AI responses instead of fixed answer rules.</p>
+
+            <section class="api-panel" aria-labelledby="api-panel-title">
+                <p id="api-panel-title">Enter your OpenAI API key to get live ChatGPT-style answers. The key stays in your browser on this device and is not written into the project files.</p>
+                <div class="api-fields">
+                    <input id="api-key" type="password" placeholder="Paste your OpenAI API key">
+                    <input id="model-name" type="text" value="gpt-4.1-mini" placeholder="Model name">
+                </div>
+                <div class="api-status" id="api-status">API key required before sending messages.</div>
+            </section>
 
             <div class="prompt-row">
                 <button class="quick-prompt" type="button" data-prompt="Explain recursion with JavaScript example">Recursion Example</button>
@@ -225,7 +263,7 @@
             </div>
 
             <div class="chat-window" id="chat-window" aria-live="polite">
-                <div class="message assistant-message">Hi, I am CodePilot AI. You can ask me about coding, school topics, general knowledge, writing ideas, and more.</div>
+                <div class="message assistant-message">Hi, I am CodePilot AI. Add your API key, then ask me anything and I will generate a live answer.</div>
             </div>
 
             <form class="chat-form" id="chat-form">
@@ -252,88 +290,136 @@
         const userInput = document.getElementById('user-input');
         const clearChat = document.getElementById('clear-chat');
         const quickPrompts = document.querySelectorAll('.quick-prompt');
+        const apiKeyInput = document.getElementById('api-key');
+        const modelNameInput = document.getElementById('model-name');
+        const apiStatus = document.getElementById('api-status');
+        const storedApiKey = localStorage.getItem('codepilot-api-key');
+        const storedModelName = localStorage.getItem('codepilot-model-name');
+
+        if (storedApiKey) {
+            apiKeyInput.value = storedApiKey;
+            apiStatus.textContent = 'API key loaded from this browser.';
+        }
+
+        if (storedModelName) {
+            modelNameInput.value = storedModelName;
+        }
+
+        apiKeyInput.addEventListener('input', function () {
+            const trimmedKey = apiKeyInput.value.trim();
+
+            if (trimmedKey) {
+                localStorage.setItem('codepilot-api-key', trimmedKey);
+                apiStatus.textContent = 'API key saved in this browser.';
+                return;
+            }
+
+            localStorage.removeItem('codepilot-api-key');
+            apiStatus.textContent = 'API key required before sending messages.';
+        });
+
+        modelNameInput.addEventListener('input', function () {
+            const trimmedModel = modelNameInput.value.trim();
+
+            if (trimmedModel) {
+                localStorage.setItem('codepilot-model-name', trimmedModel);
+                return;
+            }
+
+            localStorage.removeItem('codepilot-model-name');
+        });
 
         function appendMessage(content, role) {
             const message = document.createElement('div');
             message.className = 'message ' + (role === 'user' ? 'user-message' : 'assistant-message');
-            message.innerHTML = content;
+            message.textContent = content;
             chatWindow.appendChild(message);
             chatWindow.scrollTop = chatWindow.scrollHeight;
+            return message;
         }
 
-        function getAssistantReply(prompt) {
-            const lowerPrompt = prompt.toLowerCase();
+        async function fetchAssistantReply(prompt) {
+            const apiKey = apiKeyInput.value.trim();
+            const modelName = modelNameInput.value.trim() || 'gpt-4.1-mini';
 
-            if (lowerPrompt.includes('recursion')) {
-                return 'Recursion means a function calls itself to solve smaller versions of a problem.<pre>function factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}\nconsole.log(factorial(5)); // 120</pre>';
+            if (!apiKey) {
+                throw new Error('Add your OpenAI API key before sending a message.');
             }
 
-            if (lowerPrompt.includes('python') || lowerPrompt.includes('palindrome')) {
-                return 'Here is a clean Python palindrome checker:<pre>def is_palindrome(text):\n    cleaned = text.lower().replace(" ", "")\n    return cleaned == cleaned[::-1]\n\nprint(is_palindrome("Level"))  # True</pre>';
+            apiStatus.textContent = 'Contacting the AI model...';
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey
+                },
+                body: JSON.stringify({
+                    model: modelName,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are CodePilot AI, a helpful assistant for coding, school topics, general knowledge, and writing. Answer clearly, accurately, and concisely.'
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error('API request failed: ' + errorText);
             }
 
-            if (lowerPrompt.includes('loop') || lowerPrompt.includes('infinite')) {
-                return 'To fix an infinite loop, make sure your loop condition eventually becomes false. Also verify that the loop variable changes each iteration.<pre>i = 0\nwhile i < 5:\n    print(i)\n    i += 1  # Update prevents infinite loop</pre>';
+            const data = await response.json();
+            const reply = data.choices && data.choices[0] && data.choices[0].message
+                ? data.choices[0].message.content
+                : '';
+
+            if (!reply) {
+                throw new Error('No reply was returned from the API.');
             }
 
-            if (lowerPrompt.includes('debug')) {
-                return 'Debug step-by-step: reproduce the bug, isolate the smallest failing code, print variable states, and test one fix at a time.';
-            }
-
-            if (lowerPrompt.includes('algorithm')) {
-                return 'A good algorithm plan is: define input/output, choose data structures, write pseudocode, then check time complexity and edge cases.';
-            }
-
-            if (lowerPrompt.includes('solar system')) {
-                return 'The solar system includes the Sun and the objects that orbit it, including eight planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. It also includes moons, asteroids, and comets.';
-            }
-
-            if (lowerPrompt.includes('capital of france')) {
-                return 'The capital of France is Paris.';
-            }
-
-            if (lowerPrompt.includes('write a story') || lowerPrompt.includes('story idea')) {
-                return 'Here is a simple story idea: a young inventor discovers a notebook that predicts problems one day before they happen, and must decide whether to use it for fame or to help people quietly.';
-            }
-
-            if (lowerPrompt.includes('math') || lowerPrompt.includes('fraction')) {
-                return 'For math questions, break the problem into steps, simplify carefully, and check your final answer. If you send the exact question, I can help solve it step by step.';
-            }
-
-            if (lowerPrompt.includes('science')) {
-                return 'Science explains how the natural world works through observation, experiments, and evidence. If you give me a specific science topic, I can explain it simply.';
-            }
-
-            return 'Great question. I can help with coding, general knowledge, writing, and school topics. If you want a more precise answer, include the topic and what kind of help you want.';
+            apiStatus.textContent = 'Connected. Ready for another question.';
+            return reply;
         }
 
-        function handlePrompt(promptText) {
+        async function handlePrompt(promptText) {
             const trimmed = promptText.trim();
             if (!trimmed) {
                 return;
             }
 
             appendMessage(trimmed, 'user');
-            const reply = getAssistantReply(trimmed);
-            setTimeout(function () {
-                appendMessage(reply, 'assistant');
-            }, 300);
+            const loadingMessage = appendMessage('Thinking...', 'assistant');
+
+            try {
+                const reply = await fetchAssistantReply(trimmed);
+                loadingMessage.textContent = reply;
+            } catch (error) {
+                loadingMessage.textContent = error.message;
+                apiStatus.textContent = 'Request failed. Check your key, model, and internet connection.';
+            }
         }
 
-        chatForm.addEventListener('submit', function (event) {
+        chatForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-            handlePrompt(userInput.value);
+            await handlePrompt(userInput.value);
             userInput.value = '';
         });
 
         clearChat.addEventListener('click', function () {
-            chatWindow.innerHTML = '<div class="message assistant-message">Hi, I am CodePilot AI. You can ask me about coding, school topics, general knowledge, writing ideas, and more.</div>';
+            chatWindow.innerHTML = '';
+            appendMessage('Hi, I am CodePilot AI. Add your API key, then ask me anything and I will generate a live answer.', 'assistant');
         });
 
         quickPrompts.forEach(function (button) {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', async function () {
                 const promptText = button.getAttribute('data-prompt');
-                handlePrompt(promptText);
+                await handlePrompt(promptText);
             });
         });
     </script>
