@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,23 +86,15 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
             line-height: 1.6;
         }
-        .points-list {
+        .points-paragraph {
             margin-top: 24px;
-            display: grid;
-            gap: 16px;
-        }
-        .point-item {
             padding: 18px;
             border-radius: 14px;
             background-color: rgba(255, 255, 255, 0.14);
             color: white;
-        }
-        .point-item h2 {
-            font-size: 1.1em;
-            margin-bottom: 8px;
-        }
-        .point-item p {
+            font-size: 1.05em;
             line-height: 1.6;
+            text-align: left;
         }
         .quiz-section {
             margin-top: 32px;
@@ -215,27 +208,7 @@
         <section class="content-card">
             <p class="intro-text">CSS controls how a webpage looks and feels. These major points cover the foundations that make layouts responsive, readable, and easy to maintain.</p>
 
-            <div class="points-list">
-                <article class="point-item">
-                    <h2>1. Selectors Target Elements</h2>
-                    <p>Selectors such as element names, classes, and IDs tell the browser exactly which parts of the page should receive a style rule.</p>
-                </article>
-
-                <article class="point-item">
-                    <h2>2. The Box Model Shapes Layout</h2>
-                    <p>Every element is a box made of content, padding, border, and margin. Understanding this model helps you control spacing and alignment precisely.</p>
-                </article>
-
-                <article class="point-item">
-                    <h2>3. Flexbox And Grid Build Modern Layouts</h2>
-                    <p>Flexbox is ideal for one-dimensional alignment, while Grid handles two-dimensional page structures. Together they simplify responsive design.</p>
-                </article>
-
-                <article class="point-item">
-                    <h2>4. Responsive Design Uses Relative Units</h2>
-                    <p>Units like percentages, rem, and viewport sizes help designs adapt to different screens without breaking the layout.</p>
-                </article>
-            </div>
+            <p class="points-paragraph">CSS uses selectors such as element names, classes, and IDs to target exactly which parts of a page should be styled. It also relies on the box model, where every element is built from content, padding, border, and margin, which makes spacing and alignment easier to control. Modern layouts are usually created with Flexbox for one-dimensional alignment and Grid for two-dimensional page structure. Responsive design then builds on these ideas by using relative units like percentages, <code>rem</code>, and viewport-based sizes so pages adapt cleanly across phones, tablets, and desktops.</p>
 
             <section class="quiz-section" aria-labelledby="css-quiz-title">
                 <h2 id="css-quiz-title">Quick CSS Quiz</h2>
