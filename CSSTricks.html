@@ -25,7 +25,7 @@
         body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(135deg, 
                 #FF0000 0%, 
                 #FF7F00 8%, 
@@ -60,22 +60,112 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
         main h1 {
             color: white;
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        main p {
+        .content-card {
+            width: min(900px, 100%);
+            margin-top: 24px;
+            padding: 28px;
+            border-radius: 18px;
+            background-color: rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+        .intro-text {
             color: white;
             font-size: 1.2em;
             text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            max-width: 600px;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            line-height: 1.6;
+        }
+        .points-list {
+            margin-top: 24px;
+            display: grid;
+            gap: 16px;
+        }
+        .point-item {
+            padding: 18px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.14);
+            color: white;
+        }
+        .point-item h2 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .point-item p {
+            line-height: 1.6;
+        }
+        .quiz-section {
+            margin-top: 32px;
+            color: white;
+        }
+        .quiz-section h2 {
+            margin-bottom: 12px;
+            font-size: 1.6em;
+        }
+        .quiz-section p {
+            line-height: 1.6;
+        }
+        .quiz-question {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+        .quiz-question h3 {
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+        .quiz-option {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .quiz-option input {
+            margin-right: 10px;
+        }
+        .quiz-actions {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .quiz-button {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .primary-button {
+            background-color: #ffffff;
+            color: #222222;
+        }
+        .secondary-button {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .quiz-result {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(0, 0, 0, 0.18);
+            font-size: 1.05em;
             line-height: 1.6;
         }
         .back-link {
@@ -102,6 +192,18 @@
             color: white;
             font-size: 0.9em;
         }
+        @media (max-width: 640px) {
+            main h1 {
+                font-size: 2.3em;
+                text-align: center;
+            }
+            .content-card {
+                padding: 20px;
+            }
+            .intro-text {
+                font-size: 1.05em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -110,7 +212,66 @@
     </header>
     <main>
         <h1>CSS Tricks</h1>
-        <p>Welcome to my CSS Tricks repository! This is where I explore advanced CSS techniques, animations, layouts, and creative styling solutions. I learn about Flexbox, Grid, transitions, transforms, and much more to create beautiful and responsive web designs.</p>
+        <section class="content-card">
+            <p class="intro-text">CSS controls how a webpage looks and feels. These major points cover the foundations that make layouts responsive, readable, and easy to maintain.</p>
+
+            <div class="points-list">
+                <article class="point-item">
+                    <h2>1. Selectors Target Elements</h2>
+                    <p>Selectors such as element names, classes, and IDs tell the browser exactly which parts of the page should receive a style rule.</p>
+                </article>
+
+                <article class="point-item">
+                    <h2>2. The Box Model Shapes Layout</h2>
+                    <p>Every element is a box made of content, padding, border, and margin. Understanding this model helps you control spacing and alignment precisely.</p>
+                </article>
+
+                <article class="point-item">
+                    <h2>3. Flexbox And Grid Build Modern Layouts</h2>
+                    <p>Flexbox is ideal for one-dimensional alignment, while Grid handles two-dimensional page structures. Together they simplify responsive design.</p>
+                </article>
+
+                <article class="point-item">
+                    <h2>4. Responsive Design Uses Relative Units</h2>
+                    <p>Units like percentages, rem, and viewport sizes help designs adapt to different screens without breaking the layout.</p>
+                </article>
+            </div>
+
+            <section class="quiz-section" aria-labelledby="css-quiz-title">
+                <h2 id="css-quiz-title">Quick CSS Quiz</h2>
+                <p>Choose the best answer for each question, then click Calculate Score.</p>
+
+                <form id="css-quiz-form">
+                    <div class="quiz-question">
+                        <h3>1. Which CSS feature is best for aligning items in a single row or column?</h3>
+                        <label class="quiz-option"><input type="radio" name="question1" value="A"> A. Grid</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="B"> B. Flexbox</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="C"> C. Padding</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>2. Which part of the box model creates space outside the border?</h3>
+                        <label class="quiz-option"><input type="radio" name="question2" value="A"> A. Margin</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="B"> B. Padding</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="C"> C. Content</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>3. What is the main purpose of responsive CSS?</h3>
+                        <label class="quiz-option"><input type="radio" name="question3" value="A"> A. To hide all images</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="B"> B. To make pages adapt to different screen sizes</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="C"> C. To replace HTML tags</label>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button type="button" class="quiz-button primary-button" id="calculate-score">Calculate Score</button>
+                        <button type="reset" class="quiz-button secondary-button" id="reset-quiz">Reset Quiz</button>
+                    </div>
+                </form>
+
+                <div class="quiz-result" id="quiz-result" aria-live="polite">Your score will appear here after you submit the quiz.</div>
+            </section>
+        </section>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
         </div>
@@ -119,5 +280,48 @@
         <p>&copy; 2026 Hello World. All rights reserved.</p>
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
+    <script>
+        const quizForm = document.getElementById('css-quiz-form');
+        const calculateButton = document.getElementById('calculate-score');
+        const resetButton = document.getElementById('reset-quiz');
+        const quizResult = document.getElementById('quiz-result');
+
+        const correctAnswers = {
+            question1: 'B',
+            question2: 'A',
+            question3: 'B'
+        };
+
+        calculateButton.addEventListener('click', function () {
+            const formData = new FormData(quizForm);
+            let score = 0;
+            const totalQuestions = Object.keys(correctAnswers).length;
+
+            Object.entries(correctAnswers).forEach(function ([questionName, answer]) {
+                if (formData.get(questionName) === answer) {
+                    score += 1;
+                }
+            });
+
+            const answeredQuestions = Object.keys(correctAnswers).filter(function (questionName) {
+                return formData.get(questionName) !== null;
+            }).length;
+
+            if (answeredQuestions < totalQuestions) {
+                quizResult.textContent = 'Please answer all questions before calculating your score.';
+                return;
+            }
+
+            quizResult.textContent = 'You scored ' + score + ' out of ' + totalQuestions + '. ' + (score === totalQuestions
+                ? 'Excellent work.'
+                : score >= 2
+                    ? 'Good job. Review the points above and try again for a perfect score.'
+                    : 'Keep practicing. Read the CSS points above and try again.');
+        });
+
+        resetButton.addEventListener('click', function () {
+            quizResult.textContent = 'Your score will appear here after you submit the quiz.';
+        });
+    </script>
 </body>
 </html>
