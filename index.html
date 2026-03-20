@@ -46,7 +46,6 @@
             animation: waveFlow 8s ease-in-out infinite;
         }
         header {
-            position: relative;
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
             text-align: center;
@@ -56,25 +55,6 @@
             color: white;
             font-size: 1.5em;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-        }
-        .header-link {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-        }
-        .header-link a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background-color: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
-        }
-        .header-link a:hover {
-            color: #FFD700;
-            background-color: rgba(255, 255, 255, 0.2);
         }
         main {
             flex: 1;
@@ -138,25 +118,11 @@
             color: white;
             font-size: 0.9em;
         }
-        @media (max-width: 640px) {
-            header {
-                padding-top: 16px;
-                padding-bottom: 16px;
-            }
-            .header-link {
-                position: static;
-                transform: none;
-                margin-top: 12px;
-            }
-        }
     </style>
 </head>
 <body>
     <header>
         <h1>My Website</h1>
-        <div class="header-link">
-            <a href="CodePilotAI.html">CodePilot AI</a>
-        </div>
     </header>
     <main>
         <h1>Hello Everyone</h1>

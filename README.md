@@ -1,6 +1,2 @@
 # HelloWorld
 Simple HTML Page
-sk-proj-H4vatBIoVX9kShGcfU3MYz7bZQvKK-
-HNASViwB-5ckvpPx8sTPsyKqg-nKlWcCWE4KyV7T87mST3BlbkFJ_
-4okxXZ6uvjfZicW0S0M0dnzj0TdKJeoimnjZu2ow9NTFdkIVZf8dx_
-nheePmYheILuYWlrMIA
