@@ -370,8 +370,25 @@
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error('API request failed: ' + errorText);
+                let errorMessage = 'Request failed. Please try again.';
+                try {
+                    const errorPayload = await response.json();
+                    const apiError = errorPayload && errorPayload.error ? errorPayload.error : null;
+
+                    if (apiError && apiError.code === 'insufficient_quota') {
+                        errorMessage = 'Your API key has no quota left. Check billing/usage on platform.openai.com, then try again.';
+                    } else if (response.status === 401) {
+                        errorMessage = 'Invalid API key. Paste a valid key and try again.';
+                    } else if (response.status === 404 || (apiError && apiError.code === 'model_not_found')) {
+                        errorMessage = 'Model not found. Try a different model name, for example gpt-4.1-mini.';
+                    } else if (apiError && apiError.message) {
+                        errorMessage = apiError.message;
+                    }
+                } catch (parseError) {
+                    errorMessage = 'Request failed with status ' + response.status + '. Please try again.';
+                }
+
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
@@ -401,7 +418,7 @@
                 loadingMessage.textContent = reply;
             } catch (error) {
                 loadingMessage.textContent = error.message;
-                apiStatus.textContent = 'Request failed. Check your key, model, and internet connection.';
+                apiStatus.textContent = 'Request failed. Check quota, key, model name, and internet connection.';
             }
         }
 
