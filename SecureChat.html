@@ -183,13 +183,20 @@
 
         let currentName = '';
         let currentPassword = '';
+        const API_BASE = window.location.port === '3000' ? '' : 'http://127.0.0.1:3000';
 
-        async function postJson(url, body) {
-            const response = await fetch(url, {
+        async function postJson(path, body) {
+            const response = await fetch(API_BASE + path, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const preview = (await response.text()).slice(0, 80).replace(/\s+/g, ' ').trim();
+                throw new Error('Server returned non-JSON response. Open this page from http://127.0.0.1:3000/SecureChat.html. Received: ' + preview);
+            }
+
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || 'Request failed');
