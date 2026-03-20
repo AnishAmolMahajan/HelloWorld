@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const HOST = '0.0.0.0';
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
 const HISTORY_DIR = path.join(ROOT_DIR, 'chat_history');
 
