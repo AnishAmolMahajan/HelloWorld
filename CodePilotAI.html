@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodePilot AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @keyframes waveFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg,
+                #FF0000 0%,
+                #FF7F00 8%,
+                #FFFF00 16%,
+                #00FF00 24%,
+                #0000FF 32%,
+                #4B0082 40%,
+                #9400D3 48%,
+                #FF0000 56%,
+                #FF7F00 64%,
+                #FFFF00 72%,
+                #00FF00 80%,
+                #0000FF 88%,
+                #4B0082 96%,
+                #9400D3 100%);
+            background-size: 200% 200%;
+            font-family: 'Poppins', sans-serif;
+            animation: waveFlow 8s ease-in-out infinite;
+        }
+        header {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid white;
+        }
+        header h1 {
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        main h1 {
+            color: white;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .chat-card {
+            width: min(920px, 100%);
+            margin-top: 24px;
+            padding: 22px;
+            border-radius: 18px;
+            background-color: rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+        .intro-text {
+            color: white;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+        .prompt-row {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .quick-prompt {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 0.92em;
+            color: white;
+            background: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+        }
+        .chat-window {
+            margin-top: 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            min-height: 260px;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .user-message {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+        }
+        .assistant-message {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        .assistant-message pre {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.22);
+            overflow-x: auto;
+            font-size: 0.92em;
+        }
+        .chat-form {
+            margin-top: 14px;
+            display: grid;
+            gap: 10px;
+        }
+        .chat-form textarea {
+            width: 100%;
+            min-height: 90px;
+            resize: vertical;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 1em;
+            color: white;
+            background: rgba(0, 0, 0, 0.22);
+        }
+        .chat-form textarea::placeholder {
+            color: rgba(255, 255, 255, 0.75);
+        }
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .chat-button {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 0.98em;
+        }
+        .send-button {
+            background: white;
+            color: #222;
+        }
+        .clear-button {
+            background: rgba(255, 255, 255, 0.16);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .back-link {
+            margin-top: 24px;
+        }
+        .back-link a {
+            color: white;
+            font-size: 1.1em;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .back-link a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #FFD700;
+        }
+        footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-top: 2px solid white;
+            color: white;
+            font-size: 0.9em;
+        }
+        @media (max-width: 640px) {
+            main h1 {
+                font-size: 2.2em;
+            }
+            .chat-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Website</h1>
+    </header>
+    <main>
+        <h1>CodePilot AI</h1>
+        <section class="chat-card">
+            <p class="intro-text">Ask coding questions like debugging help, algorithm ideas, or code examples. This page simulates a coding-focused AI assistant directly in your browser.</p>
+
+            <div class="prompt-row">
+                <button class="quick-prompt" type="button" data-prompt="Explain recursion with JavaScript example">Recursion Example</button>
+                <button class="quick-prompt" type="button" data-prompt="Create a Python function to check palindrome">Python Function</button>
+                <button class="quick-prompt" type="button" data-prompt="How do I fix infinite loop in while loop?">Debug Loop</button>
+            </div>
+
+            <div class="chat-window" id="chat-window" aria-live="polite">
+                <div class="message assistant-message">Hi, I am CodePilot AI. Ask me anything about coding and I will give practical answers with examples.</div>
+            </div>
+
+            <form class="chat-form" id="chat-form">
+                <textarea id="user-input" placeholder="Type your coding question..."></textarea>
+                <div class="chat-actions">
+                    <button class="chat-button send-button" type="submit">Send</button>
+                    <button class="chat-button clear-button" type="button" id="clear-chat">Clear Chat</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2026 Hello Everyone. All rights reserved.</p>
+        <p>Author: 😊 Anish Mahajan 😊</p>
+    </footer>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const clearChat = document.getElementById('clear-chat');
+        const quickPrompts = document.querySelectorAll('.quick-prompt');
+
+        function appendMessage(content, role) {
+            const message = document.createElement('div');
+            message.className = 'message ' + (role === 'user' ? 'user-message' : 'assistant-message');
+            message.innerHTML = content;
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function getAssistantReply(prompt) {
+            const lowerPrompt = prompt.toLowerCase();
+
+            if (lowerPrompt.includes('recursion')) {
+                return 'Recursion means a function calls itself to solve smaller versions of a problem.<pre>function factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}\nconsole.log(factorial(5)); // 120</pre>';
+            }
+
+            if (lowerPrompt.includes('python') || lowerPrompt.includes('palindrome')) {
+                return 'Here is a clean Python palindrome checker:<pre>def is_palindrome(text):\n    cleaned = text.lower().replace(" ", "")\n    return cleaned == cleaned[::-1]\n\nprint(is_palindrome("Level"))  # True</pre>';
+            }
+
+            if (lowerPrompt.includes('loop') || lowerPrompt.includes('infinite')) {
+                return 'To fix an infinite loop, make sure your loop condition eventually becomes false. Also verify that the loop variable changes each iteration.<pre>i = 0\nwhile i < 5:\n    print(i)\n    i += 1  # Update prevents infinite loop</pre>';
+            }
+
+            if (lowerPrompt.includes('debug')) {
+                return 'Debug step-by-step: reproduce the bug, isolate the smallest failing code, print variable states, and test one fix at a time.';
+            }
+
+            if (lowerPrompt.includes('algorithm')) {
+                return 'A good algorithm plan is: define input/output, choose data structures, write pseudocode, then check time complexity and edge cases.';
+            }
+
+            return 'Great question. For coding tasks, share the language, expected output, and any error message. I can then give a precise fix or example solution.';
+        }
+
+        function handlePrompt(promptText) {
+            const trimmed = promptText.trim();
+            if (!trimmed) {
+                return;
+            }
+
+            appendMessage(trimmed, 'user');
+            const reply = getAssistantReply(trimmed);
+            setTimeout(function () {
+                appendMessage(reply, 'assistant');
+            }, 300);
+        }
+
+        chatForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            handlePrompt(userInput.value);
+            userInput.value = '';
+        });
+
+        clearChat.addEventListener('click', function () {
+            chatWindow.innerHTML = '<div class="message assistant-message">Hi, I am CodePilot AI. Ask me anything about coding and I will give practical answers with examples.</div>';
+        });
+
+        quickPrompts.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const promptText = button.getAttribute('data-prompt');
+                handlePrompt(promptText);
+            });
+        });
+    </script>
+</body>
+</html>
