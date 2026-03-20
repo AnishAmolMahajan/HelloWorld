@@ -215,20 +215,21 @@
     <main>
         <h1>CodePilot AI</h1>
         <section class="chat-card">
-            <p class="intro-text">Ask coding questions like debugging help, algorithm ideas, or code examples. This page simulates a coding-focused AI assistant directly in your browser.</p>
+            <p class="intro-text">Ask coding questions, school questions, general knowledge questions, or creative prompts. This page simulates a browser-based assistant that can help with both programming and everyday topics.</p>
 
             <div class="prompt-row">
                 <button class="quick-prompt" type="button" data-prompt="Explain recursion with JavaScript example">Recursion Example</button>
                 <button class="quick-prompt" type="button" data-prompt="Create a Python function to check palindrome">Python Function</button>
                 <button class="quick-prompt" type="button" data-prompt="How do I fix infinite loop in while loop?">Debug Loop</button>
+                <button class="quick-prompt" type="button" data-prompt="What is the solar system?">General Question</button>
             </div>
 
             <div class="chat-window" id="chat-window" aria-live="polite">
-                <div class="message assistant-message">Hi, I am CodePilot AI. Ask me anything about coding and I will give practical answers with examples.</div>
+                <div class="message assistant-message">Hi, I am CodePilot AI. You can ask me about coding, school topics, general knowledge, writing ideas, and more.</div>
             </div>
 
             <form class="chat-form" id="chat-form">
-                <textarea id="user-input" placeholder="Type your coding question..."></textarea>
+                <textarea id="user-input" placeholder="Type any question here..."></textarea>
                 <div class="chat-actions">
                     <button class="chat-button send-button" type="submit">Send</button>
                     <button class="chat-button clear-button" type="button" id="clear-chat">Clear Chat</button>
@@ -283,7 +284,27 @@
                 return 'A good algorithm plan is: define input/output, choose data structures, write pseudocode, then check time complexity and edge cases.';
             }
 
-            return 'Great question. For coding tasks, share the language, expected output, and any error message. I can then give a precise fix or example solution.';
+            if (lowerPrompt.includes('solar system')) {
+                return 'The solar system includes the Sun and the objects that orbit it, including eight planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. It also includes moons, asteroids, and comets.';
+            }
+
+            if (lowerPrompt.includes('capital of france')) {
+                return 'The capital of France is Paris.';
+            }
+
+            if (lowerPrompt.includes('write a story') || lowerPrompt.includes('story idea')) {
+                return 'Here is a simple story idea: a young inventor discovers a notebook that predicts problems one day before they happen, and must decide whether to use it for fame or to help people quietly.';
+            }
+
+            if (lowerPrompt.includes('math') || lowerPrompt.includes('fraction')) {
+                return 'For math questions, break the problem into steps, simplify carefully, and check your final answer. If you send the exact question, I can help solve it step by step.';
+            }
+
+            if (lowerPrompt.includes('science')) {
+                return 'Science explains how the natural world works through observation, experiments, and evidence. If you give me a specific science topic, I can explain it simply.';
+            }
+
+            return 'Great question. I can help with coding, general knowledge, writing, and school topics. If you want a more precise answer, include the topic and what kind of help you want.';
         }
 
         function handlePrompt(promptText) {
@@ -306,7 +327,7 @@
         });
 
         clearChat.addEventListener('click', function () {
-            chatWindow.innerHTML = '<div class="message assistant-message">Hi, I am CodePilot AI. Ask me anything about coding and I will give practical answers with examples.</div>';
+            chatWindow.innerHTML = '<div class="message assistant-message">Hi, I am CodePilot AI. You can ask me about coding, school topics, general knowledge, writing ideas, and more.</div>';
         });
 
         quickPrompts.forEach(function (button) {
