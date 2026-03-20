@@ -144,6 +144,7 @@
             <div id="login-view" class="login-form">
                 <h2>Login</h2>
                 <p>Enter your name and fixed password.</p>
+                <input id="api-base" type="text" placeholder="API Server URL (optional, e.g. https://your-server.example.com)">
                 <input id="name" type="text" placeholder="Name">
                 <input id="password" type="password" placeholder="Password">
                 <div class="buttons">
@@ -173,6 +174,7 @@
     <script>
         const loginView = document.getElementById('login-view');
         const chatView = document.getElementById('chat-view');
+        const apiBaseInput = document.getElementById('api-base');
         const nameInput = document.getElementById('name');
         const passwordInput = document.getElementById('password');
         const statusEl = document.getElementById('status');
@@ -183,20 +185,32 @@
 
         let currentName = '';
         let currentPassword = '';
-        const API_BASE = window.location.port === '3000'
-            ? ''
-            : window.location.protocol + '//' + window.location.hostname + ':3000';
+
+        const storedApiBase = localStorage.getItem('secureChatApiBase') || '';
+        apiBaseInput.value = storedApiBase;
+
+        function getApiBase() {
+            return apiBaseInput.value.trim().replace(/\/$/, '');
+        }
 
         async function postJson(path, body) {
-            const response = await fetch(API_BASE + path, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
+            const apiBase = getApiBase();
+            const url = apiBase ? apiBase + path : path;
+            let response;
+            try {
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            } catch (error) {
+                throw new Error('Cannot reach API server at ' + url + '. If this page is on GitHub Pages, set API Server URL to your running backend (include protocol and host).');
+            }
+
             const contentType = response.headers.get('content-type') || '';
             if (!contentType.includes('application/json')) {
                 const preview = (await response.text()).slice(0, 80).replace(/\s+/g, ' ').trim();
-                throw new Error('Server returned non-JSON response. Open this page from the server on port 3000. Received: ' + preview);
+                throw new Error('Server returned non-JSON response from ' + url + '. Received: ' + preview);
             }
 
             const data = await response.json();
@@ -237,6 +251,7 @@
         async function login() {
             const name = nameInput.value.trim();
             const password = passwordInput.value.trim();
+            localStorage.setItem('secureChatApiBase', getApiBase());
             if (!name || !password) {
                 statusEl.textContent = 'Name and password are required.';
                 return;
