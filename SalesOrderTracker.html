@@ -1570,6 +1570,12 @@
                 const plannedSpanDays = firstDate && lastDate
                     ? Math.max(1, daysBetween(firstDate, lastDate) + 1)
                     : 0;
+                const firstStageName = shipment.timeline.length
+                    ? shipment.timeline[0].name
+                    : '-';
+                const lastStageName = shipment.timeline.length
+                    ? shipment.timeline[shipment.timeline.length - 1].name
+                    : '-';
                 const plannedStageCount = parsedDates.length;
                 const totalStageCount = shipment.timeline.length;
                 const completionPercent = totalStageCount
@@ -1593,16 +1599,16 @@
                             <div class="overview-value">${plannedStageCount}/${totalStageCount}</div>
                         </div>
                         <div class="overview-item">
-                            <div class="overview-label">Start Date</div>
-                            <div class="overview-value">${firstDate ? formatDisplayDate(firstDate) : '-'}</div>
+                            <div class="overview-label">First Stage</div>
+                            <div class="overview-value">${firstStageName}</div>
                         </div>
                         <div class="overview-item">
-                            <div class="overview-label">Last Milestone</div>
-                            <div class="overview-value">${lastDate ? formatDisplayDate(lastDate) : '-'}</div>
+                            <div class="overview-label">Last Stage</div>
+                            <div class="overview-value">${lastStageName}</div>
                         </div>
                         <div class="overview-item">
                             <div class="overview-label">Planned Span</div>
-                            <div class="overview-value">${plannedSpanDays ? `${plannedSpanDays} days` : '-'}</div>
+                            <div class="overview-value">${plannedSpanDays ? formatSpanAsMonthsWeeksDays(plannedSpanDays) : '-'}</div>
                         </div>
                     </div>
                     <div class="shipment-progress">
@@ -1689,6 +1695,19 @@
             const month = MONTH_LABELS[date.getMonth()];
             const year = date.getFullYear();
             return `${day}-${month}-${year}`;
+        }
+
+        function formatSpanAsMonthsWeeksDays(totalDays) {
+            if (!totalDays || totalDays < 1) {
+                return '-';
+            }
+
+            const months = Math.floor(totalDays / 30);
+            const remainingAfterMonths = totalDays % 30;
+            const weeks = Math.floor(remainingAfterMonths / 7);
+            const days = remainingAfterMonths % 7;
+
+            return `${months} Months ${weeks} Weeks ${days} Days`;
         }
 
         function addDays(date, days) {
