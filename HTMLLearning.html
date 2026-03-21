@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Learning</title>
+    <title>HTML Fundamentals</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         * {
@@ -25,7 +25,7 @@
         body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(135deg, 
                 #FF0000 0%, 
                 #FF7F00 8%, 
@@ -60,21 +60,29 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
         main h1 {
             color: white;
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        main p {
+        .content-card {
+            width: min(900px, 100%);
+            margin-top: 24px;
+            padding: 28px;
+            border-radius: 18px;
+            background-color: rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+        .points-paragraph {
             color: white;
-            font-size: 1.2em;
-            text-align: center;
             margin-top: 20px;
-            padding: 20px;
-            max-width: 600px;
+            font-size: 1.15em;
+            text-align: left;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
             line-height: 1.6;
         }
@@ -94,6 +102,71 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: #FFD700;
         }
+        .quiz-section {
+            margin-top: 32px;
+            color: white;
+        }
+        .quiz-section h2 {
+            margin-bottom: 12px;
+            font-size: 1.6em;
+        }
+        .quiz-section p {
+            line-height: 1.6;
+        }
+        .quiz-question {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+        .quiz-question h3 {
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+        .quiz-option {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .quiz-option input {
+            margin-right: 10px;
+        }
+        .quiz-actions {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .quiz-button {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .primary-button {
+            background-color: #ffffff;
+            color: #222222;
+        }
+        .secondary-button {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .quiz-result {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background-color: rgba(0, 0, 0, 0.18);
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
         footer {
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
@@ -102,6 +175,18 @@
             color: white;
             font-size: 0.9em;
         }
+        @media (max-width: 640px) {
+            main h1 {
+                font-size: 2.3em;
+                text-align: center;
+            }
+            .content-card {
+                padding: 20px;
+            }
+            .points-paragraph {
+                font-size: 1.02em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -109,8 +194,89 @@
         <h1>My Website</h1>
     </header>
     <main>
-        <h1>HTML Learning</h1>
-        <p>This is my HTML Learning repository! Here I explore and practice various HTML concepts, tags, and best practices. I learn how to structure web pages, create semantic HTML, and build the foundation for amazing web applications.</p>
+        <h1>HTML Fundamentals</h1>
+        <section class="content-card">
+            <p class="points-paragraph">HTML is the standard markup language used to structure content on the web. It defines elements such as headings, paragraphs, links, images, forms, and tables so browsers can understand and render page content correctly. Semantic tags like <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, and <code>&lt;footer&gt;</code> improve readability, accessibility, and SEO by giving meaningful structure to documents. A strong foundation in HTML is essential because every modern website begins with clean, well-organized markup.</p>
+
+            <section class="quiz-section" aria-labelledby="html-quiz-title">
+                <h2 id="html-quiz-title">Quick HTML Quiz</h2>
+                <p>Choose the best answer for each question, then click Calculate Score.</p>
+
+                <form id="html-quiz-form">
+                    <div class="quiz-question">
+                        <h3>1. What is HTML primarily used for?</h3>
+                        <label class="quiz-option"><input type="radio" name="question1" value="A"> A. Styling page colors and layouts</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="B"> B. Structuring web content</label>
+                        <label class="quiz-option"><input type="radio" name="question1" value="C"> C. Managing server databases</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>2. Which is an example of a semantic HTML tag?</h3>
+                        <label class="quiz-option"><input type="radio" name="question2" value="A"> A. &lt;div&gt;</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="B"> B. &lt;span&gt;</label>
+                        <label class="quiz-option"><input type="radio" name="question2" value="C"> C. &lt;main&gt;</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>3. Why is semantic HTML important?</h3>
+                        <label class="quiz-option"><input type="radio" name="question3" value="A"> A. It improves accessibility and document meaning</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="B"> B. It automatically adds animations</label>
+                        <label class="quiz-option"><input type="radio" name="question3" value="C"> C. It replaces JavaScript logic</label>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button type="button" class="quiz-button primary-button" id="calculate-score">Calculate Score</button>
+                        <button type="reset" class="quiz-button secondary-button" id="reset-quiz">Reset Quiz</button>
+                    </div>
+                </form>
+
+                <div class="quiz-result" id="quiz-result" aria-live="polite">Your score will appear here after you submit the quiz.</div>
+            </section>
+        </section>
+
+        <script>
+            const quizForm = document.getElementById('html-quiz-form');
+            const calculateButton = document.getElementById('calculate-score');
+            const resetButton = document.getElementById('reset-quiz');
+            const quizResult = document.getElementById('quiz-result');
+
+            const correctAnswers = {
+                question1: 'B',
+                question2: 'C',
+                question3: 'A'
+            };
+
+            calculateButton.addEventListener('click', function () {
+                const formData = new FormData(quizForm);
+                let score = 0;
+                const totalQuestions = Object.keys(correctAnswers).length;
+
+                Object.entries(correctAnswers).forEach(function ([questionName, answer]) {
+                    if (formData.get(questionName) === answer) {
+                        score += 1;
+                    }
+                });
+
+                const answeredQuestions = Object.keys(correctAnswers).filter(function (questionName) {
+                    return formData.get(questionName) !== null;
+                }).length;
+
+                if (answeredQuestions < totalQuestions) {
+                    quizResult.textContent = 'Please answer all questions before calculating your score.';
+                    return;
+                }
+
+                quizResult.textContent = 'You scored ' + score + ' out of ' + totalQuestions + '. ' + (score === totalQuestions
+                    ? 'Excellent work.'
+                    : score >= 2
+                        ? 'Good job. Review the paragraph above and try again for a perfect score.'
+                        : 'Keep practicing. Read the HTML paragraph above and try again.');
+            });
+
+            resetButton.addEventListener('click', function () {
+                quizResult.textContent = 'Your score will appear here after you submit the quiz.';
+            });
+        </script>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
         </div>

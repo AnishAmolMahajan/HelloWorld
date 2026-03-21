@@ -80,10 +80,10 @@
             box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
         }
         .points-paragraph {
-            margin-top: 24px;
+            margin-top: 20px;
             color: white;
             font-size: 1.15em;
-            line-height: 1.8;
+            line-height: 1.6;
             text-align: left;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
@@ -234,15 +234,7 @@
                 <div class="quiz-result" id="quiz-result" aria-live="polite">Your score will appear here after you submit the quiz.</div>
             </section>
         </section>
-        <div class="back-link">
-            <a href="index.html">← Back to Home</a>
-        </div>
-    </main>
-    <footer>
-        <p>&copy; 2026 Hello World. All rights reserved.</p>
-        <p>Author: 😊 Anish Mahajan 😊</p>
-    </footer>
-    <script>
+        <script>
         const quizForm = document.getElementById('css-quiz-form');
         const calculateButton = document.getElementById('calculate-score');
         const resetButton = document.getElementById('reset-quiz');
@@ -284,7 +276,15 @@
         resetButton.addEventListener('click', function () {
             quizResult.textContent = 'Your score will appear here after you submit the quiz.';
         });
-    </script>
+        </script>
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2026 Hello World. All rights reserved.</p>
+        <p>Author: 😊 Anish Mahajan 😊</p>
+    </footer>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
