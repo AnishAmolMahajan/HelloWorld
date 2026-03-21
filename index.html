@@ -46,6 +46,7 @@
             animation: waveFlow 8s ease-in-out infinite;
         }
         header {
+            position: relative;
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
             text-align: center;
@@ -57,24 +58,39 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
         .header-buttons {
-            margin-top: 12px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
-            justify-content: center;
             gap: 12px;
         }
         .header-buttons button {
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            background-color: rgba(255, 255, 255, 0.15);
-            color: white;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            color: #111111;
             padding: 8px 16px;
             border-radius: 6px;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.2s ease, transform 0.2s ease;
         }
         .header-buttons button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: #f1f1f1;
+            transform: translateY(-1px);
+        }
+        @media (max-width: 700px) {
+            header {
+                padding-bottom: 70px;
+            }
+            .header-buttons {
+                top: auto;
+                right: 50%;
+                bottom: 16px;
+                transform: translateX(50%);
+            }
         }
         main {
             flex: 1;
