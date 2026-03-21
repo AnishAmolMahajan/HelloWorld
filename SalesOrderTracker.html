@@ -224,6 +224,11 @@
             background-color: #1e40af;
             transform: translateY(-2px);
         }
+        .page-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
         .shipments-list {
             margin-top: 32px;
         }
@@ -326,6 +331,19 @@
         }
         .stage-toggle-modal-body {
             margin-top: 16px;
+        }
+        .add-shipment-modal-card {
+            width: min(1120px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dbe3f0;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+            padding: 20px;
+        }
+        .add-shipment-modal-card .add-shipment-section {
+            margin-top: 0;
         }
         .stage-config-row {
             display: grid;
@@ -871,35 +889,8 @@
     <main>
         <h1>Sales Order Tracker</h1>
         <section class="content-card">
-            <div class="add-shipment-section">
-                <h3>Add New Shipment</h3>
-                <form id="shipmentForm">
-                    <div class="form-group">
-                        <label for="shipmentId">Shipment ID:</label>
-                        <input type="text" id="shipmentId" name="shipmentId" placeholder="e.g., SHP-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="shipmentType">Shipment Type:</label>
-                        <select id="shipmentType" name="shipmentType" required>
-                            <option value="">Select a type...</option>
-                            <option value="Stock Shipment">Stock Shipment</option>
-                            <option value="Stock Machining Shipment">Stock Machining Shipment</option>
-                            <option value="Stock Incoming Shipment">Stock Incoming Shipment</option>
-                            <option value="Supplier Shipment">Supplier Shipment</option>
-                        </select>
-                    </div>
-                    <div class="stage-config-section" id="stageConfigSection" style="display: none;">
-                        <h4>Stage Dates (One Line Per Stage)</h4>
-                        <button type="button" class="stage-toggle-trigger" id="stageToggleTrigger" style="display: none;">Choose Optional Stages</button>
-                        <div class="stage-config-header">
-                            <div class="stage-config-header-title">Stage</div>
-                            <div class="stage-config-header-scale" id="addPlannerHeader"></div>
-                            <div class="stage-config-header-date">Date</div>
-                        </div>
-                        <div id="stageConfigContainer"></div>
-                    </div>
-                    <button type="submit" class="add-shipment-btn">Add Shipment</button>
-                </form>
+            <div class="page-actions">
+                <button type="button" class="add-shipment-btn" id="openAddShipmentBtn">Add Shipment</button>
             </div>
 
             <div class="shipments-list" id="shipmentsList" style="display: none;">
@@ -955,6 +946,50 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="addShipmentModal" aria-hidden="true">
+        <div class="add-shipment-modal-card" role="dialog" aria-modal="true" aria-labelledby="addShipmentModalTitle">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="addShipmentModalTitle">Add New Shipment</div>
+                    <div class="modal-subtitle">Fill in shipment details and plan the stage dates in the popup.</div>
+                </div>
+                <button type="button" class="modal-close" id="addShipmentModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="add-shipment-section">
+                <form id="shipmentForm">
+                    <div class="form-group">
+                        <label for="shipmentId">Shipment ID:</label>
+                        <input type="text" id="shipmentId" name="shipmentId" placeholder="e.g., SHP-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shipmentType">Shipment Type:</label>
+                        <select id="shipmentType" name="shipmentType" required>
+                            <option value="">Select a type...</option>
+                            <option value="Stock Shipment">Stock Shipment</option>
+                            <option value="Stock Machining Shipment">Stock Machining Shipment</option>
+                            <option value="Stock Incoming Shipment">Stock Incoming Shipment</option>
+                            <option value="Supplier Shipment">Supplier Shipment</option>
+                        </select>
+                    </div>
+                    <div class="stage-config-section" id="stageConfigSection" style="display: none;">
+                        <h4>Stage Dates (One Line Per Stage)</h4>
+                        <button type="button" class="stage-toggle-trigger" id="stageToggleTrigger" style="display: none;">Choose Optional Stages</button>
+                        <div class="stage-config-header">
+                            <div class="stage-config-header-title">Stage</div>
+                            <div class="stage-config-header-scale" id="addPlannerHeader"></div>
+                            <div class="stage-config-header-date">Date</div>
+                        </div>
+                        <div id="stageConfigContainer"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-cancel" id="addShipmentCancelBtn">Cancel</button>
+                        <button type="submit" class="add-shipment-btn">Add Shipment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const shipmentTimelines = {
             'Stock Shipment': [
@@ -997,6 +1032,10 @@
         };
 
         let shipments = [];
+        const openAddShipmentBtn = document.getElementById('openAddShipmentBtn');
+        const addShipmentModal = document.getElementById('addShipmentModal');
+        const addShipmentModalClose = document.getElementById('addShipmentModalClose');
+        const addShipmentCancelBtn = document.getElementById('addShipmentCancelBtn');
         const shipmentForm = document.getElementById('shipmentForm');
         const shipmentTypeInput = document.getElementById('shipmentType');
         const stageConfigSection = document.getElementById('stageConfigSection');
@@ -1018,13 +1057,21 @@
         let suppressAddPlannerScrollSync = false;
         let suppressPlannerScrollSync = false;
 
+        openAddShipmentBtn.addEventListener('click', openAddShipmentModal);
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
         stageToggleTrigger.addEventListener('click', openOptionalStageModal);
+        addShipmentModalClose.addEventListener('click', closeAddShipmentModal);
+        addShipmentCancelBtn.addEventListener('click', closeAddShipmentModal);
 
         editModalClose.addEventListener('click', closeEditModal);
         editCancelBtn.addEventListener('click', closeEditModal);
         editSaveBtn.addEventListener('click', saveEditedShipmentDates);
         optionalStageModalClose.addEventListener('click', closeOptionalStageModal);
+        addShipmentModal.addEventListener('click', function (event) {
+            if (event.target === addShipmentModal) {
+                closeAddShipmentModal();
+            }
+        });
         editModal.addEventListener('click', function (event) {
             if (event.target === editModal) {
                 closeEditModal();
@@ -1055,13 +1102,31 @@
 
             shipments.push(shipment);
             displayShipments();
-            this.reset();
+            resetAddShipmentForm();
+            closeAddShipmentModal();
+        });
+
+        function openAddShipmentModal() {
+            addShipmentModal.classList.add('open');
+            addShipmentModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeAddShipmentModal() {
+            resetAddShipmentForm();
+            addShipmentModal.classList.remove('open');
+            addShipmentModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function resetAddShipmentForm() {
+            shipmentForm.reset();
             stageConfigSection.style.display = 'none';
             stageConfigContainer.innerHTML = '';
             stageToggleToolbar.innerHTML = '';
             stageToggleTrigger.style.display = 'none';
+            addPlannerHeader.innerHTML = '';
+            addPlannerState = null;
             closeOptionalStageModal();
-        });
+        }
 
         function openOptionalStageModal() {
             if (!stageToggleToolbar.children.length) {
