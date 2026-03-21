@@ -264,13 +264,25 @@
             margin-bottom: 10px;
             font-size: 1.02em;
         }
+        .stage-toggle-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #1d4ed8;
+            border-radius: 999px;
+            background-color: #ffffff;
+            color: #1d4ed8;
+            padding: 10px 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .stage-toggle-toolbar {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 12px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            scrollbar-width: thin;
         }
         .stage-toggle-chip {
             display: inline-flex;
@@ -303,6 +315,17 @@
             background-color: rgba(255, 255, 255, 0.2);
             font-size: 0.9em;
             line-height: 1;
+        }
+        .stage-toggle-modal-card {
+            width: min(760px, 100%);
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dbe3f0;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+            padding: 20px;
+        }
+        .stage-toggle-modal-body {
+            margin-top: 16px;
         }
         .stage-config-row {
             display: grid;
@@ -867,7 +890,7 @@
                     </div>
                     <div class="stage-config-section" id="stageConfigSection" style="display: none;">
                         <h4>Stage Dates (One Line Per Stage)</h4>
-                        <div class="stage-toggle-toolbar" id="stageToggleToolbar" style="display: none;"></div>
+                        <button type="button" class="stage-toggle-trigger" id="stageToggleTrigger" style="display: none;">Choose Optional Stages</button>
                         <div class="stage-config-header">
                             <div class="stage-config-header-title">Stage</div>
                             <div class="stage-config-header-scale" id="addPlannerHeader"></div>
@@ -913,6 +936,21 @@
             <div class="modal-actions">
                 <button type="button" class="modal-btn modal-btn-cancel" id="editCancelBtn">Cancel</button>
                 <button type="button" class="modal-btn modal-btn-save" id="editSaveBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="optionalStageModal" aria-hidden="true">
+        <div class="stage-toggle-modal-card" role="dialog" aria-modal="true" aria-labelledby="optionalStageModalTitle">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="optionalStageModalTitle">Select Optional Stages</div>
+                    <div class="modal-subtitle">Choose which optional stages should appear in the Add planner.</div>
+                </div>
+                <button type="button" class="modal-close" id="optionalStageModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="stage-toggle-modal-body">
+                <div class="stage-toggle-toolbar" id="stageToggleToolbar"></div>
             </div>
         </div>
     </div>
@@ -963,9 +1001,12 @@
         const shipmentTypeInput = document.getElementById('shipmentType');
         const stageConfigSection = document.getElementById('stageConfigSection');
         const stageConfigContainer = document.getElementById('stageConfigContainer');
+        const stageToggleTrigger = document.getElementById('stageToggleTrigger');
         const stageToggleToolbar = document.getElementById('stageToggleToolbar');
         const addPlannerHeader = document.getElementById('addPlannerHeader');
         const editModal = document.getElementById('editModal');
+        const optionalStageModal = document.getElementById('optionalStageModal');
+        const optionalStageModalClose = document.getElementById('optionalStageModalClose');
         const editPlannerHeader = document.getElementById('editPlannerHeader');
         const editStageContainer = document.getElementById('editStageContainer');
         const editModalClose = document.getElementById('editModalClose');
@@ -978,13 +1019,20 @@
         let suppressPlannerScrollSync = false;
 
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
+        stageToggleTrigger.addEventListener('click', openOptionalStageModal);
 
         editModalClose.addEventListener('click', closeEditModal);
         editCancelBtn.addEventListener('click', closeEditModal);
         editSaveBtn.addEventListener('click', saveEditedShipmentDates);
+        optionalStageModalClose.addEventListener('click', closeOptionalStageModal);
         editModal.addEventListener('click', function (event) {
             if (event.target === editModal) {
                 closeEditModal();
+            }
+        });
+        optionalStageModal.addEventListener('click', function (event) {
+            if (event.target === optionalStageModal) {
+                closeOptionalStageModal();
             }
         });
 
@@ -1011,8 +1059,37 @@
             stageConfigSection.style.display = 'none';
             stageConfigContainer.innerHTML = '';
             stageToggleToolbar.innerHTML = '';
-            stageToggleToolbar.style.display = 'none';
+            stageToggleTrigger.style.display = 'none';
+            closeOptionalStageModal();
         });
+
+        function openOptionalStageModal() {
+            if (!stageToggleToolbar.children.length) {
+                return;
+            }
+
+            optionalStageModal.classList.add('open');
+            optionalStageModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeOptionalStageModal() {
+            optionalStageModal.classList.remove('open');
+            optionalStageModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function updateStageToggleTriggerLabel() {
+            const toggleButtons = Array.from(stageToggleToolbar.querySelectorAll('.stage-toggle-chip'));
+            if (!toggleButtons.length) {
+                stageToggleTrigger.style.display = 'none';
+                return;
+            }
+
+            const activeCount = toggleButtons.filter(function (button) {
+                return button.classList.contains('is-active');
+            }).length;
+            stageToggleTrigger.style.display = 'inline-flex';
+            stageToggleTrigger.textContent = `Choose Optional Stages (${activeCount}/${toggleButtons.length} selected)`;
+        }
 
         function updateStageToggleChip(button, applicable) {
             button.classList.toggle('is-active', applicable);
@@ -1045,15 +1122,18 @@
             if (toggleButton) {
                 updateStageToggleChip(toggleButton, applicable);
             }
+
+            updateStageToggleTriggerLabel();
         }
 
         function renderStageConfigRows() {
             const selectedType = shipmentTypeInput.value;
             stageConfigContainer.innerHTML = '';
             stageToggleToolbar.innerHTML = '';
-            stageToggleToolbar.style.display = 'none';
+            stageToggleTrigger.style.display = 'none';
             addPlannerHeader.innerHTML = '';
             addPlannerState = null;
+            closeOptionalStageModal();
 
             if (!selectedType) {
                 stageConfigSection.style.display = 'none';
@@ -1123,7 +1203,6 @@
                 syncSliderFromDate(dateInput, sliderInput, addPlannerState);
 
                 if (!isMandatory) {
-                    stageToggleToolbar.style.display = 'flex';
                     const toggleButton = document.createElement('button');
                     toggleButton.type = 'button';
                     toggleButton.className = 'stage-toggle-chip is-active';
@@ -1141,6 +1220,7 @@
                 }
             });
 
+            updateStageToggleTriggerLabel();
             setupAddPlannerInteractions(initialScrollLeft);
             stageConfigSection.style.display = 'block';
         }
