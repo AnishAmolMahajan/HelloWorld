@@ -161,6 +161,136 @@
             font-size: 1.05em;
             line-height: 1.6;
         }
+        .add-shipment-section {
+            margin-top: 32px;
+            background-color: rgba(255, 255, 255, 0.06);
+            padding: 24px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .add-shipment-section h3 {
+            color: #FFD700;
+            font-size: 1.3em;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .form-group select option {
+            background-color: #1a1a2e;
+            color: white;
+        }
+        .add-shipment-btn {
+            background-color: #FFD700;
+            color: #1a1a2e;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .add-shipment-btn:hover {
+            background-color: #FFC702;
+            transform: translateY(-2px);
+        }
+        .shipments-list {
+            margin-top: 32px;
+        }
+        .shipments-list h3 {
+            color: #FFD700;
+            font-size: 1.3em;
+            margin-bottom: 16px;
+        }
+        .shipment-card {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 5px solid #FFD700;
+        }
+        .shipment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .shipment-header h4 {
+            color: #FFD700;
+            font-size: 1.15em;
+        }
+        .shipment-details {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+            font-size: 0.95em;
+        }
+        .shipment-details p {
+            margin: 6px 0;
+        }
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .timeline-stage {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .stage-indicator {
+            width: 12px;
+            height: 12px;
+            background-color: #FFD700;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+        .stage-content {
+            flex: 1;
+        }
+        .stage-name {
+            color: #FFD700;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .stage-date {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+        }
+        .remove-shipment-btn {
+            background-color: rgba(255, 77, 77, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        .remove-shipment-btn:hover {
+            background-color: rgba(255, 77, 77, 1);
+        }
         footer {
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
@@ -211,6 +341,36 @@
                     <p>Direct shipment from the supplier to the client, often used for items not held in stock or for drop-shipping arrangements.</p>
                 </div>
             </div>
+
+            <div class="add-shipment-section">
+                <h3>Add New Shipment</h3>
+                <form id="shipmentForm">
+                    <div class="form-group">
+                        <label for="shipmentId">Shipment ID:</label>
+                        <input type="text" id="shipmentId" name="shipmentId" placeholder="e.g., SHP-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shipmentType">Shipment Type:</label>
+                        <select id="shipmentType" name="shipmentType" required>
+                            <option value="">Select a type...</option>
+                            <option value="Stock Shipment">Stock Shipment</option>
+                            <option value="Stock Machining Shipment">Stock Machining Shipment</option>
+                            <option value="Stock Incoming Shipment">Stock Incoming Shipment</option>
+                            <option value="Supplier Shipment">Supplier Shipment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="shipmentDate">Shipment Date:</label>
+                        <input type="date" id="shipmentDate" name="shipmentDate" required>
+                    </div>
+                    <button type="submit" class="add-shipment-btn">Add Shipment</button>
+                </form>
+            </div>
+
+            <div class="shipments-list" id="shipmentsList" style="display: none;">
+                <h3>Added Shipments</h3>
+                <div id="shipmentsContainer"></div>
+            </div>
         </section>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
@@ -220,6 +380,118 @@
         <p>&copy; 2026 Hello World. All rights reserved.</p>
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
+
+    <script>
+        const shipmentTimelines = {
+            'Stock Shipment': [
+                { stage: 'Order Processing', days: 1 },
+                { stage: 'Pick & Pack', days: 2 },
+                { stage: 'Quality Check', days: 1 },
+                { stage: 'Dispatch', days: 1 },
+                { stage: 'In Transit', days: 3 },
+                { stage: 'Delivery', days: 0 }
+            ],
+            'Stock Machining Shipment': [
+                { stage: 'Order Processing', days: 1 },
+                { stage: 'Machining Setup', days: 2 },
+                { stage: 'Machining Execution', days: 3 },
+                { stage: 'Quality Check', days: 2 },
+                { stage: 'Dispatch', days: 1 },
+                { stage: 'In Transit', days: 3 },
+                { stage: 'Delivery', days: 0 }
+            ],
+            'Stock Incoming Shipment': [
+                { stage: 'Supplier Notification', days: 1 },
+                { stage: 'Goods in Transit', days: 5 },
+                { stage: 'Receiving', days: 1 },
+                { stage: 'Quality Inspection', days: 2 },
+                { stage: 'Storage', days: 1 },
+                { stage: 'Ready for Processing', days: 0 }
+            ],
+            'Supplier Shipment': [
+                { stage: 'Order Confirmation', days: 1 },
+                { stage: 'Supplier Preparation', days: 2 },
+                { stage: 'Dispatch from Supplier', days: 1 },
+                { stage: 'In Transit', days: 4 },
+                { stage: 'Delivery to Client', days: 0 }
+            ]
+        };
+
+        let shipments = [];
+
+        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const shipmentId = document.getElementById('shipmentId').value;
+            const shipmentType = document.getElementById('shipmentType').value;
+            const shipmentDate = document.getElementById('shipmentDate').value;
+
+            const shipment = {
+                id: shipmentId,
+                type: shipmentType,
+                date: new Date(shipmentDate),
+                timeline: shipmentTimelines[shipmentType]
+            };
+
+            shipments.push(shipment);
+            displayShipments();
+            this.reset();
+        });
+
+        function displayShipments() {
+            const container = document.getElementById('shipmentsContainer');
+            const listDiv = document.getElementById('shipmentsList');
+
+            if (shipments.length === 0) {
+                listDiv.style.display = 'none';
+                return;
+            }
+
+            listDiv.style.display = 'block';
+            container.innerHTML = '';
+
+            shipments.forEach((shipment, index) => {
+                const card = document.createElement('div');
+                card.className = 'shipment-card';
+
+                let timelineHTML = '<div class="timeline">';
+                shipment.timeline.forEach(stage => {
+                    const stageDate = new Date(shipment.date);
+                    stageDate.setDate(stageDate.getDate() + stage.days);
+                    
+                    timelineHTML += `
+                        <div class="timeline-stage">
+                            <div class="stage-indicator"></div>
+                            <div class="stage-content">
+                                <div class="stage-name">${stage.stage}</div>
+                                <div class="stage-date">${stageDate.toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                timelineHTML += '</div>';
+
+                card.innerHTML = `
+                    <div class="shipment-header">
+                        <h4>Shipment #${shipment.id}</h4>
+                        <button class="remove-shipment-btn" onclick="removeShipment(${index})">Remove</button>
+                    </div>
+                    <div class="shipment-details">
+                        <p><strong>Type:</strong> ${shipment.type}</p>
+                        <p><strong>Start Date:</strong> ${shipment.date.toLocaleDateString()}</p>
+                    </div>
+                    ${timelineHTML}
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function removeShipment(index) {
+            shipments.splice(index, 1);
+            displayShipments();
+        }
+    </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
