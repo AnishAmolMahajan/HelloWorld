@@ -370,6 +370,37 @@
             font-family: 'Poppins', sans-serif;
             font-size: 0.9em;
         }
+        .stage-config-date-input-wrap {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 38px;
+            gap: 6px;
+            align-items: center;
+        }
+        .stage-config-date-picker {
+            width: 38px;
+            height: 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #1e3a8a;
+            cursor: pointer;
+            font-size: 1.05em;
+            line-height: 1;
+            padding: 0;
+        }
+        .stage-config-date-picker:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .stage-config-native-date {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+        }
         .stage-config-date-cell {
             display: flex;
             flex-direction: column;
@@ -1187,15 +1218,26 @@
         function applyStageConfigApplicability(row, toggleButton, applicable) {
             const sliderInput = row.querySelector('.stage-config-slider');
             const dateInput = row.querySelector('.stage-config-date');
+            const nativeDateInput = row.querySelector('.stage-config-native-date');
+            const datePickerButton = row.querySelector('.stage-config-date-picker');
 
             row.dataset.applicable = applicable ? 'true' : 'false';
             row.style.display = applicable ? '' : 'none';
             sliderInput.disabled = !applicable;
             dateInput.disabled = !applicable;
+            if (nativeDateInput) {
+                nativeDateInput.disabled = !applicable;
+            }
+            if (datePickerButton) {
+                datePickerButton.disabled = !applicable;
+            }
             dateInput.required = applicable;
 
             if (!applicable) {
                 dateInput.value = '';
+                if (nativeDateInput) {
+                    nativeDateInput.value = '';
+                }
                 sliderInput.value = sliderInput.min;
                 updateSliderProgress(sliderInput);
             } else if (!dateInput.value) {
@@ -1276,7 +1318,11 @@
                         </div>
                     </div>
                     <div class="stage-config-date-cell">
-                        <input type="text" class="stage-config-date" data-stage-name="${stage.name}" value="${formatDisplayDate(parseLocalDate(existingDate))}" placeholder="dd-MMM-yyyy" autocomplete="off" required>
+                        <div class="stage-config-date-input-wrap">
+                            <input type="text" class="stage-config-date" data-stage-name="${stage.name}" value="${formatDisplayDate(parseLocalDate(existingDate))}" placeholder="dd-MMM-yyyy" autocomplete="off" required>
+                            <button type="button" class="stage-config-date-picker" aria-label="Open date picker" title="Open date picker">📅</button>
+                            <input type="date" class="stage-config-native-date" value="${existingDate}" tabindex="-1" aria-hidden="true">
+                        </div>
                         ${isMandatory ? '<span class="mandatory-pill">Mandatory</span>' : ''}
                     </div>
                 `;
@@ -1284,13 +1330,23 @@
 
                 const sliderInput = row.querySelector('.stage-config-slider');
                 const dateInput = row.querySelector('.stage-config-date');
+                const nativeDateInput = row.querySelector('.stage-config-native-date');
+                const datePickerButton = row.querySelector('.stage-config-date-picker');
 
                 sliderInput.addEventListener('input', function () {
                     syncDateFromSlider(sliderInput, dateInput, addPlannerState);
+                    if (nativeDateInput) {
+                        const parsedFromDisplay = parseLocalDate(dateInput.value);
+                        nativeDateInput.value = parsedFromDisplay ? formatInputDate(parsedFromDisplay) : '';
+                    }
                 });
 
                 dateInput.addEventListener('input', function () {
                     syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+                    if (nativeDateInput) {
+                        const parsedFromDisplay = parseLocalDate(dateInput.value);
+                        nativeDateInput.value = parsedFromDisplay ? formatInputDate(parsedFromDisplay) : '';
+                    }
                 });
 
                 dateInput.addEventListener('blur', function () {
@@ -1298,7 +1354,35 @@
                     if (parsedDate) {
                         dateInput.value = formatDisplayDate(parsedDate);
                     }
+                    if (nativeDateInput) {
+                        nativeDateInput.value = parsedDate ? formatInputDate(parsedDate) : '';
+                    }
                 });
+
+                if (datePickerButton && nativeDateInput) {
+                    datePickerButton.addEventListener('click', function () {
+                        if (nativeDateInput.disabled) {
+                            return;
+                        }
+                        if (typeof nativeDateInput.showPicker === 'function') {
+                            nativeDateInput.showPicker();
+                        } else {
+                            nativeDateInput.click();
+                        }
+                    });
+
+                    nativeDateInput.addEventListener('change', function () {
+                        if (!nativeDateInput.value) {
+                            dateInput.value = '';
+                            syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+                            return;
+                        }
+
+                        const parsedNativeDate = parseLocalDate(nativeDateInput.value);
+                        dateInput.value = parsedNativeDate ? formatDisplayDate(parsedNativeDate) : '';
+                        syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+                    });
+                }
 
                 syncSliderFromDate(dateInput, sliderInput, addPlannerState);
 
