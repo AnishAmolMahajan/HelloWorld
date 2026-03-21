@@ -286,14 +286,15 @@
         }
         .stage-toggle-toolbar {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
         .stage-toggle-chip {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            flex: none;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
             border: 1px solid #94a3b8;
             border-radius: 999px;
             background-color: #f8fafc;
@@ -322,18 +323,20 @@
             line-height: 1;
         }
         .stage-toggle-modal-card {
-            width: 90vw;
-            max-width: 90vw;
-            height: 90vh;
-            max-height: 90vh;
+            width: min(440px, 92vw);
+            max-width: 92vw;
+            max-height: 70vh;
             background-color: #ffffff;
             border-radius: 12px;
             border: 1px solid #dbe3f0;
             box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
             padding: 20px;
+            overflow: hidden;
         }
         .stage-toggle-modal-body {
             margin-top: 16px;
+            max-height: calc(70vh - 96px);
+            overflow-y: auto;
         }
         .add-shipment-modal-card {
             width: 90vw;
