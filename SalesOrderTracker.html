@@ -1088,7 +1088,7 @@
                 })
                 : addDays(anchorDate, 90);
 
-            const rangeStart = startOfMonth(new Date(minimumDate.getFullYear(), minimumDate.getMonth() - 3, 1));
+            const rangeStart = startOfMonth(minimumDate);
             const rangeEnd = endOfMonth(new Date(maximumDate.getFullYear(), maximumDate.getMonth() + 12, 1));
             const totalDays = Math.max(daysBetween(rangeStart, rangeEnd), 1);
             const months = [];
