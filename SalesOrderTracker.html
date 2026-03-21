@@ -218,6 +218,70 @@
         .shipments-list {
             margin-top: 32px;
         }
+        .preview-section {
+            margin-top: 22px;
+            padding: 16px;
+            border-radius: 10px;
+            background-color: #eef4ff;
+            border: 1px solid #c4d7ff;
+        }
+        .preview-section h4 {
+            color: #1d4ed8;
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+        .optional-stages-section {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background-color: #eef4ff;
+            border: 1px solid #c4d7ff;
+        }
+        .optional-stages-section h4 {
+            color: #1d4ed8;
+            margin-bottom: 10px;
+            font-size: 1.02em;
+        }
+        .optional-stage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-top: 1px solid #dbe8ff;
+        }
+        .optional-stage-item:first-child {
+            border-top: none;
+        }
+        .optional-stage-name {
+            color: #334155;
+            font-size: 0.95em;
+        }
+        .stage-pill-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .stage-pill-toggle input {
+            display: none;
+        }
+        .stage-pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid #94a3b8;
+            color: #475569;
+            font-size: 0.82em;
+            font-weight: 600;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        .stage-pill-toggle input:checked + .stage-pill {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #ffffff;
+        }
         .shipments-list h3 {
             color: #1d4ed8;
             font-size: 1.3em;
@@ -364,6 +428,14 @@
                         <label for="shipmentDate">Shipment Date:</label>
                         <input type="date" id="shipmentDate" name="shipmentDate" required>
                     </div>
+                    <div class="optional-stages-section" id="optionalStagesSection" style="display: none;">
+                        <h4>Optional Date Applicability</h4>
+                        <div id="optionalStagesContainer"></div>
+                    </div>
+                    <div class="preview-section" id="timelinePreview" style="display: none;">
+                        <h4>Timeline Preview (Before Add)</h4>
+                        <div id="timelinePreviewContainer"></div>
+                    </div>
                     <button type="submit" class="add-shipment-btn">Add Shipment</button>
                 </form>
             </div>
@@ -385,47 +457,60 @@
     <script>
         const shipmentTimelines = {
             'Stock Shipment': [
-                'Stock Picked',
-                'Stock Quality Inspection',
-                'Delivery To Client'
+                { name: 'Stock Picked', mandatory: true },
+                { name: 'Stock Quality Inspection', mandatory: true },
+                { name: 'Delivery To Client', mandatory: true }
             ],
             'Stock Machining Shipment': [
-                'Stock Picked',
-                'Stock Quality Inspection',
-                'Machining Receipt',
-                'Delivery To Client'
+                { name: 'Stock Picked', mandatory: true },
+                { name: 'Stock Quality Inspection', mandatory: true },
+                { name: 'Machining Receipt', mandatory: true },
+                { name: 'Delivery To Client', mandatory: true }
             ],
             'Stock Incoming Shipment': [
-                'Production Start',
-                'Production Inspection',
-                'Production Completion',
-                'Material Readiness Document Approval',
-                'Material Readiness',
-                'Materil Readiness Inspection',
-                'Supplier Delivery Scope',
-                'GRN Allocation',
-                'Stock Picked',
-                'Stock Quality Inspection',
-                'Delivery To Client'
+                { name: 'Production Start', mandatory: false },
+                { name: 'Production Inspection', mandatory: false },
+                { name: 'Production Completion', mandatory: false },
+                { name: 'Material Readiness Document Approval', mandatory: false },
+                { name: 'Material Readiness', mandatory: true },
+                { name: 'Material Readiness Inspection', mandatory: false },
+                { name: 'Supplier Delivery Scope', mandatory: false },
+                { name: 'GRN Allocation', mandatory: true },
+                { name: 'Stock Picked', mandatory: true },
+                { name: 'Stock Quality Inspection', mandatory: true },
+                { name: 'Delivery To Client', mandatory: true }
             ],
             'Supplier Shipment': [
-                'PO Placement',
-                'PO Acknoledgement',
-                'Pre Production Document Approval',
-                'Production Start',
-                'Production Inspection',
-                'Production Completion',
-                'Material Readiness Document Approval',
-                'Material Readiness',
-                'Materil Readiness Inspection',
-                'Supplier Delivery Scope',
-                'Delivery To Client'
+                { name: 'PO Placement', mandatory: true },
+                { name: 'PO Acknoledgement', mandatory: true },
+                { name: 'Pre Production Document Approval', mandatory: false },
+                { name: 'Production Start', mandatory: false },
+                { name: 'Production Inspection', mandatory: false },
+                { name: 'Production Completion', mandatory: false },
+                { name: 'Material Readiness Document Approval', mandatory: true },
+                { name: 'Material Readiness', mandatory: true },
+                { name: 'Material Readiness Inspection', mandatory: false },
+                { name: 'Supplier Delivery Scope', mandatory: true },
+                { name: 'Delivery To Client', mandatory: true }
             ]
         };
 
         let shipments = [];
+        const shipmentForm = document.getElementById('shipmentForm');
+        const shipmentTypeInput = document.getElementById('shipmentType');
+        const shipmentDateInput = document.getElementById('shipmentDate');
+        const optionalStagesSection = document.getElementById('optionalStagesSection');
+        const optionalStagesContainer = document.getElementById('optionalStagesContainer');
+        const timelinePreview = document.getElementById('timelinePreview');
+        const timelinePreviewContainer = document.getElementById('timelinePreviewContainer');
 
-        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
+        shipmentTypeInput.addEventListener('change', function () {
+            updateOptionalStageSelectors();
+            updateTimelinePreview();
+        });
+        shipmentDateInput.addEventListener('change', updateTimelinePreview);
+
+        shipmentForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const shipmentId = document.getElementById('shipmentId').value;
@@ -436,13 +521,113 @@
                 id: shipmentId,
                 type: shipmentType,
                 date: new Date(shipmentDate),
-                timeline: shipmentTimelines[shipmentType]
+                timeline: getApplicableTimelineForType(shipmentType)
             };
 
             shipments.push(shipment);
             displayShipments();
             this.reset();
+            optionalStagesSection.style.display = 'none';
+            optionalStagesContainer.innerHTML = '';
+            timelinePreview.style.display = 'none';
+            timelinePreviewContainer.innerHTML = '';
         });
+
+        function updateOptionalStageSelectors() {
+            const selectedType = shipmentTypeInput.value;
+            optionalStagesContainer.innerHTML = '';
+
+            if (!selectedType) {
+                optionalStagesSection.style.display = 'none';
+                return;
+            }
+
+            const stages = shipmentTimelines[selectedType] || [];
+            const optionalStages = stages.filter(function (stage) {
+                return !stage.mandatory;
+            });
+
+            if (optionalStages.length === 0) {
+                optionalStagesSection.style.display = 'none';
+                return;
+            }
+
+            optionalStages.forEach(function (stage, optionalIndex) {
+                const row = document.createElement('div');
+                row.className = 'optional-stage-item';
+                row.innerHTML = `
+                    <div class="optional-stage-name">${stage.name}</div>
+                    <label class="stage-pill-toggle">
+                        <input type="checkbox" class="optional-stage-checkbox" data-optional-index="${optionalIndex}" checked>
+                        <span class="stage-pill">Applicable</span>
+                    </label>
+                `;
+                optionalStagesContainer.appendChild(row);
+            });
+
+            optionalStagesSection.style.display = 'block';
+
+            optionalStagesContainer.querySelectorAll('.optional-stage-checkbox').forEach(function (checkbox) {
+                checkbox.addEventListener('change', updateTimelinePreview);
+            });
+        }
+
+        function getApplicableTimelineForType(type) {
+            const stages = shipmentTimelines[type] || [];
+            const optionalCheckboxes = optionalStagesContainer.querySelectorAll('.optional-stage-checkbox');
+            let optionalPointer = 0;
+
+            return stages.filter(function (stage) {
+                if (stage.mandatory) {
+                    return true;
+                }
+
+                const checkbox = optionalCheckboxes[optionalPointer];
+                optionalPointer += 1;
+                return checkbox ? checkbox.checked : true;
+            }).map(function (stage) {
+                return stage.name;
+            });
+        }
+
+        function buildTimelineMarkup(stages, startDate) {
+            let timelineHTML = '<div class="timeline">';
+
+            stages.forEach((stage, stageIndex) => {
+                const stageDate = new Date(startDate);
+                stageDate.setDate(stageDate.getDate() + stageIndex);
+
+                timelineHTML += `
+                    <div class="timeline-stage">
+                        <div class="stage-indicator"></div>
+                        <div class="stage-content">
+                            <div class="stage-name">${stage}</div>
+                            <div class="stage-date">${stageDate.toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            timelineHTML += '</div>';
+            return timelineHTML;
+        }
+
+        function updateTimelinePreview() {
+            const selectedType = shipmentTypeInput.value;
+            const selectedDate = shipmentDateInput.value;
+
+            if (!selectedType || !selectedDate) {
+                timelinePreview.style.display = 'none';
+                timelinePreviewContainer.innerHTML = '';
+                return;
+            }
+
+            const stages = getApplicableTimelineForType(selectedType);
+            const startDate = new Date(selectedDate);
+
+            timelinePreviewContainer.innerHTML = buildTimelineMarkup(stages, startDate);
+            timelinePreview.style.display = 'block';
+        }
 
         function displayShipments() {
             const container = document.getElementById('shipmentsContainer');
@@ -460,22 +645,7 @@
                 const card = document.createElement('div');
                 card.className = 'shipment-card';
 
-                let timelineHTML = '<div class="timeline">';
-                shipment.timeline.forEach((stage, stageIndex) => {
-                    const stageDate = new Date(shipment.date);
-                    stageDate.setDate(stageDate.getDate() + stageIndex);
-                    
-                    timelineHTML += `
-                        <div class="timeline-stage">
-                            <div class="stage-indicator"></div>
-                            <div class="stage-content">
-                                <div class="stage-name">${stage}</div>
-                                <div class="stage-date">${stageDate.toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                timelineHTML += '</div>';
+                const timelineHTML = buildTimelineMarkup(shipment.timeline, shipment.date);
 
                 card.innerHTML = `
                     <div class="shipment-header">
