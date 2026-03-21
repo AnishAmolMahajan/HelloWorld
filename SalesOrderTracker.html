@@ -197,45 +197,6 @@
         .shipments-list {
             margin-top: 32px;
         }
-        .preview-section {
-            margin-top: 22px;
-            padding: 16px;
-            border-radius: 10px;
-            background-color: #eef4ff;
-            border: 1px solid #c4d7ff;
-        }
-        .preview-section h4 {
-            color: #1d4ed8;
-            margin-bottom: 12px;
-            font-size: 1.05em;
-        }
-        .optional-stages-section {
-            margin-top: 18px;
-            padding: 14px;
-            border-radius: 10px;
-            background-color: #eef4ff;
-            border: 1px solid #c4d7ff;
-        }
-        .optional-stages-section h4 {
-            color: #1d4ed8;
-            margin-bottom: 10px;
-            font-size: 1.02em;
-        }
-        .optional-stage-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-top: 1px solid #dbe8ff;
-        }
-        .optional-stage-item:first-child {
-            border-top: none;
-        }
-        .optional-stage-name {
-            color: #334155;
-            font-size: 0.95em;
-        }
         .stage-pill-toggle {
             display: inline-flex;
             align-items: center;
@@ -554,10 +515,6 @@
                             <option value="Supplier Shipment">Supplier Shipment</option>
                         </select>
                     </div>
-                    <div class="optional-stages-section" id="optionalStagesSection" style="display: none;">
-                        <h4>Optional Date Applicability</h4>
-                        <div id="optionalStagesContainer"></div>
-                    </div>
                     <div class="stage-config-section" id="stageConfigSection" style="display: none;">
                         <h4>Stage Dates (One Line Per Stage)</h4>
                         <div id="stageConfigContainer"></div>
@@ -638,8 +595,6 @@
         let shipments = [];
         const shipmentForm = document.getElementById('shipmentForm');
         const shipmentTypeInput = document.getElementById('shipmentType');
-        const optionalStagesSection = document.getElementById('optionalStagesSection');
-        const optionalStagesContainer = document.getElementById('optionalStagesContainer');
         const stageConfigSection = document.getElementById('stageConfigSection');
         const stageConfigContainer = document.getElementById('stageConfigContainer');
         const editModal = document.getElementById('editModal');
@@ -649,10 +604,7 @@
         const editSaveBtn = document.getElementById('editSaveBtn');
         let editingShipmentIndex = null;
 
-        shipmentTypeInput.addEventListener('change', function () {
-            updateOptionalStageSelectors();
-            renderStageConfigRows();
-        });
+        shipmentTypeInput.addEventListener('change', renderStageConfigRows);
 
         editModalClose.addEventListener('click', closeEditModal);
         editCancelBtn.addEventListener('click', closeEditModal);
@@ -683,68 +635,9 @@
             shipments.push(shipment);
             displayShipments();
             this.reset();
-            optionalStagesSection.style.display = 'none';
-            optionalStagesContainer.innerHTML = '';
             stageConfigSection.style.display = 'none';
             stageConfigContainer.innerHTML = '';
         });
-
-        function updateOptionalStageSelectors() {
-            const selectedType = shipmentTypeInput.value;
-            optionalStagesContainer.innerHTML = '';
-
-            if (!selectedType) {
-                optionalStagesSection.style.display = 'none';
-                return;
-            }
-
-            const stages = shipmentTimelines[selectedType] || [];
-            const optionalStages = stages.filter(function (stage) {
-                return !stage.mandatory;
-            });
-
-            if (optionalStages.length === 0) {
-                optionalStagesSection.style.display = 'none';
-                return;
-            }
-
-            optionalStages.forEach(function (stage, optionalIndex) {
-                const row = document.createElement('div');
-                row.className = 'optional-stage-item';
-                row.innerHTML = `
-                    <div class="optional-stage-name">${stage.name}</div>
-                    <label class="stage-pill-toggle">
-                        <input type="checkbox" class="optional-stage-checkbox" data-optional-index="${optionalIndex}" checked>
-                        <span class="stage-pill">Applicable</span>
-                    </label>
-                `;
-                optionalStagesContainer.appendChild(row);
-            });
-
-            optionalStagesSection.style.display = 'block';
-
-            optionalStagesContainer.querySelectorAll('.optional-stage-checkbox').forEach(function (checkbox) {
-                checkbox.addEventListener('change', renderStageConfigRows);
-            });
-        }
-
-        function getApplicableTimelineForType(type) {
-            const stages = shipmentTimelines[type] || [];
-            const optionalCheckboxes = optionalStagesContainer.querySelectorAll('.optional-stage-checkbox');
-            let optionalPointer = 0;
-
-            return stages.filter(function (stage) {
-                if (stage.mandatory) {
-                    return true;
-                }
-
-                const checkbox = optionalCheckboxes[optionalPointer];
-                optionalPointer += 1;
-                return checkbox ? checkbox.checked : true;
-            }).map(function (stage) {
-                return stage.name;
-            });
-        }
 
         function renderStageConfigRows() {
             const selectedType = shipmentTypeInput.value;
@@ -755,46 +648,67 @@
                 return;
             }
 
-            const applicableStages = getApplicableTimelineForType(selectedType);
-            if (!applicableStages.length) {
+            const stages = shipmentTimelines[selectedType] || [];
+            if (!stages.length) {
                 stageConfigSection.style.display = 'none';
                 return;
             }
 
             const today = new Date().toISOString().split('T')[0];
 
-            applicableStages.forEach(function (stageName) {
-                const originalStage = (shipmentTimelines[selectedType] || []).find(function (s) {
-                    return s.name === stageName;
-                });
-                const isMandatory = originalStage ? originalStage.mandatory : true;
+            stages.forEach(function (stage) {
+                const isMandatory = stage.mandatory;
 
                 const row = document.createElement('div');
                 row.className = 'stage-config-row';
+                row.dataset.stageName = stage.name;
+                row.dataset.mandatory = isMandatory ? 'true' : 'false';
                 row.innerHTML = `
-                    <div class="stage-config-name">${stageName}</div>
-                    <input type="date" class="stage-config-date" data-stage-name="${stageName}" value="${today}" required>
+                    <div class="stage-config-name">${stage.name}</div>
+                    <input type="date" class="stage-config-date" data-stage-name="${stage.name}" value="${today}" required>
                     ${isMandatory
                         ? '<span class="mandatory-pill">Mandatory</span>'
-                        : '<span class="stage-pill">Optional</span>'}
+                        : '<label class="stage-pill-toggle"><input type="checkbox" class="stage-applicable-checkbox" checked><span class="stage-pill">Applicable</span></label>'}
                 `;
                 stageConfigContainer.appendChild(row);
+
+                if (!isMandatory) {
+                    const checkbox = row.querySelector('.stage-applicable-checkbox');
+                    const dateInput = row.querySelector('.stage-config-date');
+                    const pill = row.querySelector('.stage-pill');
+
+                    checkbox.addEventListener('change', function () {
+                        const applicable = checkbox.checked;
+                        dateInput.disabled = !applicable;
+                        dateInput.required = applicable;
+                        pill.textContent = applicable ? 'Applicable' : 'Not Applicable';
+                    });
+                }
             });
 
             stageConfigSection.style.display = 'block';
         }
 
-        function getSelectedTimelineWithDates(type) {
-            const applicableStages = getApplicableTimelineForType(type);
-            const dateInputs = stageConfigContainer.querySelectorAll('.stage-config-date');
+        function getSelectedTimelineWithDates() {
+            const stageRows = Array.from(stageConfigContainer.querySelectorAll('.stage-config-row'));
 
-            const selectedTimeline = applicableStages.map(function (stageName, index) {
-                const dateValue = dateInputs[index] ? dateInputs[index].value : '';
-                return {
-                    name: stageName,
-                    date: dateValue
-                };
-            });
+            const selectedTimeline = stageRows
+                .filter(function (row) {
+                    const isMandatory = row.dataset.mandatory === 'true';
+                    if (isMandatory) {
+                        return true;
+                    }
+
+                    const checkbox = row.querySelector('.stage-applicable-checkbox');
+                    return checkbox ? checkbox.checked : false;
+                })
+                .map(function (row) {
+                    const dateInput = row.querySelector('.stage-config-date');
+                    return {
+                        name: row.dataset.stageName,
+                        date: dateInput ? dateInput.value : ''
+                    };
+                });
 
             const hasMissingDate = selectedTimeline.some(function (stage) {
                 return !stage.date;
