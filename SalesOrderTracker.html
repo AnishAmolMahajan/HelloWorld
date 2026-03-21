@@ -1276,7 +1276,7 @@
                         </div>
                     </div>
                     <div class="stage-config-date-cell">
-                        <input type="date" class="stage-config-date" data-stage-name="${stage.name}" value="${existingDate}" required>
+                        <input type="text" class="stage-config-date" data-stage-name="${stage.name}" value="${formatDisplayDate(parseLocalDate(existingDate))}" placeholder="dd-MMM-yyyy" autocomplete="off" required>
                         ${isMandatory ? '<span class="mandatory-pill">Mandatory</span>' : ''}
                     </div>
                 `;
@@ -1291,6 +1291,13 @@
 
                 dateInput.addEventListener('input', function () {
                     syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+                });
+
+                dateInput.addEventListener('blur', function () {
+                    const parsedDate = parseLocalDate(dateInput.value);
+                    if (parsedDate) {
+                        dateInput.value = formatDisplayDate(parsedDate);
+                    }
                 });
 
                 syncSliderFromDate(dateInput, sliderInput, addPlannerState);
@@ -1333,9 +1340,10 @@
                 })
                 .map(function (row) {
                     const dateInput = row.querySelector('.stage-config-date');
+                    const parsedDate = dateInput ? parseLocalDate(dateInput.value) : null;
                     return {
                         name: row.dataset.stageName,
-                        date: dateInput ? dateInput.value : ''
+                        date: parsedDate ? formatInputDate(parsedDate) : ''
                     };
                 });
 
@@ -1344,7 +1352,7 @@
             });
 
             if (hasMissingDate) {
-                alert('Please select a date for each applicable stage before saving the shipment.');
+                alert('Please enter a valid date in dd-MMM-yyyy format for each applicable stage before saving the shipment.');
                 return [];
             }
 
@@ -1355,14 +1363,14 @@
             let timelineHTML = '<div class="timeline">';
 
             stages.forEach((stage) => {
-                const stageDate = stage.date ? new Date(stage.date) : null;
+                const stageDate = parseLocalDate(stage.date);
 
                 timelineHTML += `
                     <div class="timeline-stage">
                         <div class="stage-indicator"></div>
                         <div class="stage-content">
                             <div class="stage-name">${stage.name}</div>
-                            <div class="stage-date">${stageDate ? stageDate.toLocaleDateString() : '-'}</div>
+                            <div class="stage-date">${stageDate ? formatDisplayDate(stageDate) : '-'}</div>
                         </div>
                     </div>
                 `;
@@ -1391,7 +1399,7 @@
                 const timelineHTML = buildTimelineMarkup(shipment.timeline);
 
                 const firstStageDate = shipment.timeline.length > 0 && shipment.timeline[0].date
-                    ? new Date(shipment.timeline[0].date).toLocaleDateString()
+                    ? formatDisplayDate(parseLocalDate(shipment.timeline[0].date))
                     : '-';
 
                 card.innerHTML = `
@@ -1423,15 +1431,59 @@
                 return null;
             }
 
-            const parts = dateString.split('-').map(Number);
-            return new Date(parts[0], parts[1] - 1, parts[2]);
+            const trimmedValue = dateString.trim();
+            const isoMatch = trimmedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (isoMatch) {
+                const isoYear = Number(isoMatch[1]);
+                const isoMonth = Number(isoMatch[2]);
+                const isoDay = Number(isoMatch[3]);
+                const isoDate = new Date(isoYear, isoMonth - 1, isoDay);
+                if (isoDate.getFullYear() === isoYear && isoDate.getMonth() === isoMonth - 1 && isoDate.getDate() === isoDay) {
+                    return isoDate;
+                }
+                return null;
+            }
+
+            const displayMatch = trimmedValue.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+            if (!displayMatch) {
+                return null;
+            }
+
+            const displayDay = Number(displayMatch[1]);
+            const displayMonthIndex = MONTH_LABELS.findIndex(function (monthLabel) {
+                return monthLabel.toLowerCase() === displayMatch[2].toLowerCase();
+            });
+            const displayYear = Number(displayMatch[3]);
+            if (displayMonthIndex === -1) {
+                return null;
+            }
+
+            const displayDate = new Date(displayYear, displayMonthIndex, displayDay);
+            if (displayDate.getFullYear() !== displayYear || displayDate.getMonth() !== displayMonthIndex || displayDate.getDate() !== displayDay) {
+                return null;
+            }
+
+            return displayDate;
         }
+
+        const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         function formatInputDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        function formatDisplayDate(date) {
+            if (!date) {
+                return '';
+            }
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = MONTH_LABELS[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
         }
 
         function addDays(date, days) {
@@ -1662,7 +1714,7 @@
             }
 
             const selectedDate = addDays(plannerState.startDate, Number(slider.value));
-            dateInput.value = formatInputDate(selectedDate);
+            dateInput.value = formatDisplayDate(selectedDate);
             updateSliderProgress(slider);
         }
 
