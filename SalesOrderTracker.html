@@ -533,12 +533,6 @@
             border-left: 1px solid #e2e8f0;
             border-right: 1px solid #e2e8f0;
             overflow: hidden;
-            overflow-x: auto;
-            cursor: grab;
-            scrollbar-width: thin;
-        }
-        .edit-stage-planner.is-dragging {
-            cursor: grabbing;
         }
         .edit-stage-scroll {
             position: relative;
@@ -1200,9 +1194,7 @@
 
         function setupPlannerInteractions(initialScrollLeft) {
             const areas = getPlannerScrollAreas();
-            areas.forEach(function (area) {
-                attachPlannerDrag(area);
-            });
+            attachPlannerDrag(editPlannerHeader);
 
             const scrollLeft = Math.max(0, initialScrollLeft || 0);
             areas.forEach(function (area) {
