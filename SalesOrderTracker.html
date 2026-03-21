@@ -73,7 +73,7 @@
             text-shadow: none;
         }
         .content-card {
-            width: min(1140px, 100%);
+            width: min(95vw, 1400px);
             margin-top: 24px;
             padding: 28px;
             border-radius: 18px;
@@ -632,8 +632,11 @@
         }
         .shipment-milestones {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
         }
         .milestone-chip {
             display: inline-flex;
@@ -643,8 +646,8 @@
             border-radius: 10px;
             border: 1px solid #dbe3f0;
             background-color: #ffffff;
-            min-width: 160px;
-            flex: 1 1 200px;
+            min-width: 180px;
+            flex: 0 0 auto;
         }
         .milestone-dot {
             width: 9px;
@@ -944,6 +947,7 @@
                 text-align: center;
             }
             .content-card {
+                width: 95vw;
                 padding: 20px;
             }
             .points-paragraph {
