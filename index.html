@@ -56,6 +56,26 @@
             font-size: 1.5em;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
+        .header-buttons {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header-buttons button {
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .header-buttons button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
         main {
             flex: 1;
             display: flex;
@@ -123,6 +143,10 @@
 <body>
     <header>
         <h1>My Website</h1>
+        <div class="header-buttons">
+            <button type="button">Rainbow</button>
+            <button type="button">Colors</button>
+        </div>
     </header>
     <main>
         <h1>Hello Everyone</h1>
