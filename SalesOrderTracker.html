@@ -1088,10 +1088,8 @@
                 })
                 : addDays(anchorDate, 90);
 
-            const rangeStart = startOfQuarter(addDays(minimumDate, -180));
-            const tentativeEnd = endOfMonth(addDays(maximumDate, 210));
-            const minimumEnd = endOfMonth(addDays(rangeStart, 365));
-            const rangeEnd = tentativeEnd > minimumEnd ? tentativeEnd : minimumEnd;
+            const rangeStart = startOfMonth(new Date(minimumDate.getFullYear(), minimumDate.getMonth() - 3, 1));
+            const rangeEnd = endOfMonth(new Date(maximumDate.getFullYear(), maximumDate.getMonth() + 12, 1));
             const totalDays = Math.max(daysBetween(rangeStart, rangeEnd), 1);
             const months = [];
             const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
