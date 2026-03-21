@@ -910,30 +910,6 @@
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
 
-    <div class="modal-overlay" id="editModal" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
-            <div class="modal-header">
-                <div>
-                    <div class="modal-title" id="editModalTitle">Edit Shipment Dates</div>
-                    <div class="modal-subtitle">Use the planner slider or type the date manually for each stage.</div>
-                </div>
-                <button type="button" class="modal-close" id="editModalClose" aria-label="Close">&times;</button>
-            </div>
-            <div class="edit-planner-board">
-                <div class="planner-header">
-                    <div class="planner-header-title">Stage</div>
-                    <div class="planner-header-scale" id="editPlannerHeader"></div>
-                    <div class="planner-header-date">Date</div>
-                </div>
-                <div id="editStageContainer"></div>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="modal-btn modal-btn-cancel" id="editCancelBtn">Cancel</button>
-                <button type="button" class="modal-btn modal-btn-save" id="editSaveBtn">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="optionalStageModal" aria-hidden="true">
         <div class="stage-toggle-modal-card" role="dialog" aria-modal="true" aria-labelledby="optionalStageModalTitle">
             <div class="modal-header">
@@ -954,7 +930,7 @@
             <div class="modal-header">
                 <div>
                     <div class="modal-title" id="addShipmentModalTitle">Add New Shipment</div>
-                    <div class="modal-subtitle">Fill in shipment details and plan the stage dates in the popup.</div>
+                    <div class="modal-subtitle" id="addShipmentModalSubtitle">Fill in shipment details and plan the stage dates in the popup.</div>
                 </div>
                 <button type="button" class="modal-close" id="addShipmentModalClose" aria-label="Close">&times;</button>
             </div>
@@ -986,7 +962,7 @@
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="modal-btn modal-btn-cancel" id="addShipmentCancelBtn">Cancel</button>
-                        <button type="submit" class="add-shipment-btn">Add Shipment</button>
+                        <button type="submit" class="add-shipment-btn" id="submitShipmentBtn">Add Shipment</button>
                     </div>
                 </form>
             </div>
@@ -1037,8 +1013,11 @@
         let shipments = [];
         const openAddShipmentBtn = document.getElementById('openAddShipmentBtn');
         const addShipmentModal = document.getElementById('addShipmentModal');
+        const addShipmentModalTitle = document.getElementById('addShipmentModalTitle');
+        const addShipmentModalSubtitle = document.getElementById('addShipmentModalSubtitle');
         const addShipmentModalClose = document.getElementById('addShipmentModalClose');
         const addShipmentCancelBtn = document.getElementById('addShipmentCancelBtn');
+        const submitShipmentBtn = document.getElementById('submitShipmentBtn');
         const shipmentForm = document.getElementById('shipmentForm');
         const shipmentTypeInput = document.getElementById('shipmentType');
         const stageConfigSection = document.getElementById('stageConfigSection');
@@ -1046,38 +1025,25 @@
         const stageToggleTrigger = document.getElementById('stageToggleTrigger');
         const stageToggleToolbar = document.getElementById('stageToggleToolbar');
         const addPlannerHeader = document.getElementById('addPlannerHeader');
-        const editModal = document.getElementById('editModal');
         const optionalStageModal = document.getElementById('optionalStageModal');
         const optionalStageModalClose = document.getElementById('optionalStageModalClose');
-        const editPlannerHeader = document.getElementById('editPlannerHeader');
-        const editStageContainer = document.getElementById('editStageContainer');
-        const editModalClose = document.getElementById('editModalClose');
-        const editCancelBtn = document.getElementById('editCancelBtn');
-        const editSaveBtn = document.getElementById('editSaveBtn');
         let editingShipmentIndex = null;
+        let activeShipmentDraft = null;
         let addPlannerState = null;
-        let editPlannerState = null;
         let suppressAddPlannerScrollSync = false;
-        let suppressPlannerScrollSync = false;
 
-        openAddShipmentBtn.addEventListener('click', openAddShipmentModal);
+        openAddShipmentBtn.addEventListener('click', function () {
+            openAddShipmentModal();
+        });
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
         stageToggleTrigger.addEventListener('click', openOptionalStageModal);
         addShipmentModalClose.addEventListener('click', closeAddShipmentModal);
         addShipmentCancelBtn.addEventListener('click', closeAddShipmentModal);
 
-        editModalClose.addEventListener('click', closeEditModal);
-        editCancelBtn.addEventListener('click', closeEditModal);
-        editSaveBtn.addEventListener('click', saveEditedShipmentDates);
         optionalStageModalClose.addEventListener('click', closeOptionalStageModal);
         addShipmentModal.addEventListener('click', function (event) {
             if (event.target === addShipmentModal) {
                 closeAddShipmentModal();
-            }
-        });
-        editModal.addEventListener('click', function (event) {
-            if (event.target === editModal) {
-                closeEditModal();
             }
         });
         optionalStageModal.addEventListener('click', function (event) {
@@ -1103,13 +1069,60 @@
                 timeline
             };
 
-            shipments.push(shipment);
+            if (editingShipmentIndex === null) {
+                shipments.push(shipment);
+            } else {
+                shipments[editingShipmentIndex] = shipment;
+            }
+
             displayShipments();
             resetAddShipmentForm();
             closeAddShipmentModal();
         });
 
-        function openAddShipmentModal() {
+        function setShipmentModalMode() {
+            if (editingShipmentIndex === null) {
+                addShipmentModalTitle.textContent = 'Add New Shipment';
+                addShipmentModalSubtitle.textContent = 'Fill in shipment details and plan the stage dates in the popup.';
+                submitShipmentBtn.textContent = 'Add Shipment';
+                return;
+            }
+
+            addShipmentModalTitle.textContent = 'Edit Shipment';
+            addShipmentModalSubtitle.textContent = 'Update shipment details and revise the stage dates in the same popup.';
+            submitShipmentBtn.textContent = 'Save Changes';
+        }
+
+        function openAddShipmentModal(shipmentIndex) {
+            if (typeof shipmentIndex === 'number') {
+                const shipment = shipments[shipmentIndex];
+                if (!shipment) {
+                    return;
+                }
+
+                editingShipmentIndex = shipmentIndex;
+                activeShipmentDraft = {
+                    id: shipment.id,
+                    type: shipment.type,
+                    timeline: shipment.timeline.map(function (stage) {
+                        return {
+                            name: stage.name,
+                            date: stage.date
+                        };
+                    })
+                };
+                shipmentForm.reset();
+                document.getElementById('shipmentId').value = shipment.id;
+                shipmentTypeInput.value = shipment.type;
+                renderStageConfigRows();
+            } else {
+                editingShipmentIndex = null;
+                activeShipmentDraft = null;
+                shipmentForm.reset();
+                renderStageConfigRows();
+            }
+
+            setShipmentModalMode();
             addShipmentModal.classList.add('open');
             addShipmentModal.setAttribute('aria-hidden', 'false');
         }
@@ -1122,6 +1135,9 @@
 
         function resetAddShipmentForm() {
             shipmentForm.reset();
+            editingShipmentIndex = null;
+            activeShipmentDraft = null;
+            setShipmentModalMode();
             stageConfigSection.style.display = 'none';
             stageConfigContainer.innerHTML = '';
             stageToggleToolbar.innerHTML = '';
@@ -1215,10 +1231,17 @@
             }
 
             const today = new Date().toISOString().split('T')[0];
+            const existingStageMap = new Map(
+                activeShipmentDraft && activeShipmentDraft.type === selectedType
+                    ? activeShipmentDraft.timeline.map(function (stage) {
+                        return [stage.name, stage.date];
+                    })
+                    : []
+            );
             const plannerSourceStages = stages.map(function (stage) {
                 return {
                     name: stage.name,
-                    date: today
+                    date: existingStageMap.get(stage.name) || today
                 };
             });
             addPlannerState = buildPlannerState(plannerSourceStages);
@@ -1230,10 +1253,12 @@
 
             stages.forEach(function (stage, stageIndex) {
                 const isMandatory = stage.mandatory;
+                const existingDate = existingStageMap.get(stage.name) || today;
+                const isInitiallyApplicable = isMandatory || !activeShipmentDraft || existingStageMap.has(stage.name);
                 const initialOffset = addPlannerState
                     ? Math.min(
                         addPlannerState.totalDays,
-                        Math.max(0, daysBetween(addPlannerState.startDate, parseLocalDate(today)))
+                        Math.max(0, daysBetween(addPlannerState.startDate, parseLocalDate(existingDate)))
                     )
                     : 0;
 
@@ -1251,7 +1276,7 @@
                         </div>
                     </div>
                     <div class="stage-config-date-cell">
-                        <input type="date" class="stage-config-date" data-stage-name="${stage.name}" value="${today}" required>
+                        <input type="date" class="stage-config-date" data-stage-name="${stage.name}" value="${existingDate}" required>
                         ${isMandatory ? '<span class="mandatory-pill">Mandatory</span>' : ''}
                     </div>
                 `;
@@ -1273,14 +1298,15 @@
                 if (!isMandatory) {
                     const toggleButton = document.createElement('button');
                     toggleButton.type = 'button';
-                    toggleButton.className = 'stage-toggle-chip is-active';
+                    toggleButton.className = 'stage-toggle-chip';
                     toggleButton.dataset.stageName = stage.name;
-                    updateStageToggleChip(toggleButton, true);
+                    updateStageToggleChip(toggleButton, isInitiallyApplicable);
                     toggleButton.addEventListener('click', function () {
                         const nextApplicable = row.dataset.applicable !== 'true';
                         applyStageConfigApplicability(row, toggleButton, nextApplicable);
                     });
                     stageToggleToolbar.appendChild(toggleButton);
+                    applyStageConfigApplicability(row, toggleButton, isInitiallyApplicable);
                 }
 
                 if (stageIndex === 0) {
@@ -1318,7 +1344,7 @@
             });
 
             if (hasMissingDate) {
-                alert('Please select a date for each applicable stage before adding the shipment.');
+                alert('Please select a date for each applicable stage before saving the shipment.');
                 return [];
             }
 
@@ -1544,24 +1570,6 @@
             suppressAddPlannerScrollSync = false;
         }
 
-        function getPlannerScrollAreas() {
-            return [editPlannerHeader].concat(Array.from(editStageContainer.querySelectorAll('.edit-stage-planner')));
-        }
-
-        function syncPlannerScroll(source) {
-            if (suppressPlannerScrollSync) {
-                return;
-            }
-
-            suppressPlannerScrollSync = true;
-            getPlannerScrollAreas().forEach(function (area) {
-                if (area !== source) {
-                    area.scrollLeft = source.scrollLeft;
-                }
-            });
-            suppressPlannerScrollSync = false;
-        }
-
         function attachPlannerDrag(area, onSync) {
             if (!area || area.dataset.dragBound === 'true') {
                 return;
@@ -1619,16 +1627,6 @@
             });
         }
 
-        function setupPlannerInteractions(initialScrollLeft) {
-            const areas = getPlannerScrollAreas();
-            attachPlannerDrag(editPlannerHeader, syncPlannerScroll);
-
-            const scrollLeft = Math.max(0, initialScrollLeft || 0);
-            areas.forEach(function (area) {
-                area.scrollLeft = scrollLeft;
-            });
-        }
-
         function updateSliderProgress(slider) {
             const min = Number(slider.min) || 0;
             const max = Number(slider.max) || 1;
@@ -1669,102 +1667,7 @@
         }
 
         function openEditShipment(index) {
-            const shipment = shipments[index];
-            if (!shipment) {
-                return;
-            }
-
-            editingShipmentIndex = index;
-            editPlannerState = buildPlannerState(shipment.timeline);
-            renderPlannerHeader(editPlannerState, editPlannerHeader);
-            editStageContainer.innerHTML = '';
-            let initialScrollLeft = 0;
-
-            shipment.timeline.forEach(function (stage, stageIndex) {
-                const row = document.createElement('div');
-                row.className = 'edit-stage-row';
-                const initialDate = stage.date || formatInputDate(new Date());
-                const initialOffset = editPlannerState
-                    ? Math.min(
-                        editPlannerState.totalDays,
-                        Math.max(0, daysBetween(editPlannerState.startDate, parseLocalDate(initialDate)))
-                    )
-                    : 0;
-                row.innerHTML = `
-                    <div class="edit-stage-name">${stage.name}</div>
-                    <div class="edit-stage-planner">
-                        <div class="edit-stage-scroll" style="width: ${editPlannerState.timelineWidth + 32}px;">
-                            <div class="edit-stage-grid">${createPlannerGridMarkup(editPlannerState.months, 'edit-stage-grid-cell')}</div>
-                            <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}" style="width: ${editPlannerState.timelineWidth}px; margin-left: 0;">
-                        </div>
-                    </div>
-                    <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${initialDate}" required>
-                `;
-
-                const slider = row.querySelector('.edit-stage-slider');
-                const dateInput = row.querySelector('.edit-stage-date');
-
-                slider.addEventListener('input', function () {
-                    syncDateFromSlider(slider, dateInput, editPlannerState);
-                });
-
-                dateInput.addEventListener('input', function () {
-                    syncSliderFromDate(dateInput, slider, editPlannerState);
-                });
-
-                syncSliderFromDate(dateInput, slider, editPlannerState);
-                editStageContainer.appendChild(row);
-
-                if (stageIndex === 0) {
-                    initialScrollLeft = Math.max(0, initialOffset * editPlannerState.dayWidth - 120);
-                }
-            });
-
-            setupPlannerInteractions(initialScrollLeft);
-
-            editModal.classList.add('open');
-            editModal.setAttribute('aria-hidden', 'false');
-        }
-
-        function closeEditModal() {
-            editModal.classList.remove('open');
-            editModal.setAttribute('aria-hidden', 'true');
-            editingShipmentIndex = null;
-            editPlannerState = null;
-            editPlannerHeader.innerHTML = '';
-            editStageContainer.innerHTML = '';
-        }
-
-        function saveEditedShipmentDates() {
-            if (editingShipmentIndex === null) {
-                return;
-            }
-
-            const shipment = shipments[editingShipmentIndex];
-            if (!shipment) {
-                closeEditModal();
-                return;
-            }
-
-            const dateInputs = editStageContainer.querySelectorAll('.edit-stage-date');
-            const hasMissingDate = Array.from(dateInputs).some(function (input) {
-                return !input.value;
-            });
-
-            if (hasMissingDate) {
-                alert('Please select a date for every stage before saving changes.');
-                return;
-            }
-
-            shipment.timeline = shipment.timeline.map(function (stage, stageIndex) {
-                return {
-                    name: stage.name,
-                    date: dateInputs[stageIndex] ? dateInputs[stageIndex].value : stage.date
-                };
-            });
-
-            closeEditModal();
-            displayShipments();
+            openAddShipmentModal(index);
         }
 
         window.openEditShipment = openEditShipment;
