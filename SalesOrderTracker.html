@@ -331,6 +331,11 @@
             align-items: center;
             margin-bottom: 16px;
         }
+        .shipment-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
         .shipment-header h4 {
             color: #1d4ed8;
             font-size: 1.15em;
@@ -386,6 +391,108 @@
         .remove-shipment-btn:hover {
             background-color: #dc2626;
         }
+        .edit-shipment-btn {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        .edit-shipment-btn:hover {
+            background-color: #1e40af;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-card {
+            width: min(700px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dbe3f0;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+            padding: 20px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .modal-title {
+            color: #1e3a8a;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        .modal-close {
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-size: 1.5em;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .edit-stage-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid #e2e8f0;
+        }
+        .edit-stage-row:first-of-type {
+            border-top: none;
+        }
+        .edit-stage-name {
+            color: #334155;
+            font-size: 0.95em;
+        }
+        .edit-stage-date {
+            width: 170px;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #1f2937;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .modal-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        .modal-btn-cancel {
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+        .modal-btn-save {
+            background-color: #1d4ed8;
+            color: #ffffff;
+        }
         footer {
             background-color: #ffffff;
             padding: 20px;
@@ -410,6 +517,12 @@
                 gap: 8px;
             }
             .stage-config-date {
+                width: 100%;
+            }
+            .edit-stage-row {
+                grid-template-columns: 1fr;
+            }
+            .edit-stage-date {
                 width: 100%;
             }
         }
@@ -467,6 +580,20 @@
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
 
+    <div class="modal-overlay" id="editModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+            <div class="modal-header">
+                <div class="modal-title" id="editModalTitle">Edit Shipment Dates</div>
+                <button type="button" class="modal-close" id="editModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div id="editStageContainer"></div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-cancel" id="editCancelBtn">Cancel</button>
+                <button type="button" class="modal-btn modal-btn-save" id="editSaveBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const shipmentTimelines = {
             'Stock Shipment': [
@@ -515,10 +642,25 @@
         const optionalStagesContainer = document.getElementById('optionalStagesContainer');
         const stageConfigSection = document.getElementById('stageConfigSection');
         const stageConfigContainer = document.getElementById('stageConfigContainer');
+        const editModal = document.getElementById('editModal');
+        const editStageContainer = document.getElementById('editStageContainer');
+        const editModalClose = document.getElementById('editModalClose');
+        const editCancelBtn = document.getElementById('editCancelBtn');
+        const editSaveBtn = document.getElementById('editSaveBtn');
+        let editingShipmentIndex = null;
 
         shipmentTypeInput.addEventListener('change', function () {
             updateOptionalStageSelectors();
             renderStageConfigRows();
+        });
+
+        editModalClose.addEventListener('click', closeEditModal);
+        editCancelBtn.addEventListener('click', closeEditModal);
+        editSaveBtn.addEventListener('click', saveEditedShipmentDates);
+        editModal.addEventListener('click', function (event) {
+            if (event.target === editModal) {
+                closeEditModal();
+            }
         });
 
         shipmentForm.addEventListener('submit', function(e) {
@@ -712,7 +854,10 @@
                 card.innerHTML = `
                     <div class="shipment-header">
                         <h4>Shipment #${shipment.id}</h4>
-                        <button class="remove-shipment-btn" onclick="removeShipment(${index})">Remove</button>
+                        <div class="shipment-actions">
+                            <button class="edit-shipment-btn" onclick="openEditShipment(${index})">Edit</button>
+                            <button class="remove-shipment-btn" onclick="removeShipment(${index})">Remove</button>
+                        </div>
                     </div>
                     <div class="shipment-details">
                         <p><strong>Type:</strong> ${shipment.type}</p>
@@ -729,6 +874,71 @@
             shipments.splice(index, 1);
             displayShipments();
         }
+
+        function openEditShipment(index) {
+            const shipment = shipments[index];
+            if (!shipment) {
+                return;
+            }
+
+            editingShipmentIndex = index;
+            editStageContainer.innerHTML = '';
+
+            shipment.timeline.forEach(function (stage, stageIndex) {
+                const row = document.createElement('div');
+                row.className = 'edit-stage-row';
+                row.innerHTML = `
+                    <div class="edit-stage-name">${stage.name}</div>
+                    <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${stage.date || ''}" required>
+                `;
+                editStageContainer.appendChild(row);
+            });
+
+            editModal.classList.add('open');
+            editModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeEditModal() {
+            editModal.classList.remove('open');
+            editModal.setAttribute('aria-hidden', 'true');
+            editingShipmentIndex = null;
+            editStageContainer.innerHTML = '';
+        }
+
+        function saveEditedShipmentDates() {
+            if (editingShipmentIndex === null) {
+                return;
+            }
+
+            const shipment = shipments[editingShipmentIndex];
+            if (!shipment) {
+                closeEditModal();
+                return;
+            }
+
+            const dateInputs = editStageContainer.querySelectorAll('.edit-stage-date');
+            const hasMissingDate = Array.from(dateInputs).some(function (input) {
+                return !input.value;
+            });
+
+            if (hasMissingDate) {
+                alert('Please select a date for every stage before saving changes.');
+                return;
+            }
+
+            shipment.timeline = shipment.timeline.map(function (stage, stageIndex) {
+                return {
+                    name: stage.name,
+                    date: dateInputs[stageIndex] ? dateInputs[stageIndex].value : stage.date
+                };
+            });
+
+            closeEditModal();
+            displayShipments();
+        }
+
+        window.openEditShipment = openEditShipment;
+        window.removeShipment = removeShipment;
     </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
