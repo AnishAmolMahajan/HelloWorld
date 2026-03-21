@@ -1048,6 +1048,11 @@
                         plannerCell.classList.toggle('is-hidden', !applicable);
                         if (!applicable) {
                             dateInput.value = '';
+                            sliderInput.value = sliderInput.min;
+                            updateSliderProgress(sliderInput);
+                        } else if (!dateInput.value) {
+                            sliderInput.value = sliderInput.min;
+                            updateSliderProgress(sliderInput);
                         }
                         pill.textContent = applicable ? 'Applicable' : 'Not Applicable';
                     });
@@ -1409,7 +1414,13 @@
 
         function syncSliderFromDate(dateInput, slider, plannerState) {
             const parsed = parseLocalDate(dateInput.value);
-            if (!parsed || !plannerState) {
+            if (!plannerState) {
+                return;
+            }
+
+            if (!parsed) {
+                slider.value = slider.min;
+                updateSliderProgress(slider);
                 return;
             }
 
