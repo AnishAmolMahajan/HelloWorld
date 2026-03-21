@@ -266,7 +266,7 @@
         }
         .stage-config-row {
             display: grid;
-            grid-template-columns: 220px minmax(360px, 1fr) 170px auto;
+            grid-template-columns: 190px minmax(280px, 1fr) 150px 130px;
             align-items: center;
             gap: 10px;
             padding: 8px 0;
@@ -291,7 +291,7 @@
         }
         .stage-config-header {
             display: grid;
-            grid-template-columns: 220px minmax(360px, 1fr) 170px auto;
+            grid-template-columns: 190px minmax(280px, 1fr) 150px 130px;
             align-items: stretch;
             border: 1px solid #c4d7ff;
             border-radius: 10px;
@@ -749,9 +749,19 @@
             .points-paragraph {
                 font-size: 1.02em;
             }
+            .stage-config-header {
+                display: none;
+            }
             .stage-config-row {
                 grid-template-columns: 1fr;
                 gap: 8px;
+            }
+            .stage-config-planner {
+                border-left: none;
+                border-right: none;
+            }
+            .stage-config-scroll {
+                min-width: 720px;
             }
             .stage-config-date {
                 width: 100%;
