@@ -568,10 +568,10 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            margin-top: 18px;
+            margin-top: 14px;
             -webkit-appearance: none;
             appearance: none;
-            height: 12px;
+            height: 18px;
             border-radius: 999px;
             background: linear-gradient(to right, #68a7df 0%, #68a7df var(--slider-progress, 0%), #d9e7f8 var(--slider-progress, 0%), #d9e7f8 100%);
             outline: none;
@@ -579,30 +579,22 @@
         .edit-stage-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background-color: #1d4ed8;
-            border: 2px solid #ffffff;
+            border: 3px solid #ffffff;
             box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
             cursor: pointer;
         }
         .edit-stage-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background-color: #1d4ed8;
-            border: 2px solid #ffffff;
+            border: 3px solid #ffffff;
             box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
             cursor: pointer;
-        }
-        .edit-stage-slider-value {
-            position: relative;
-            z-index: 1;
-            margin-top: 10px;
-            color: #1d4ed8;
-            font-size: 0.82em;
-            font-weight: 600;
         }
         .edit-stage-date {
             width: calc(100% - 32px);
@@ -1056,19 +1048,6 @@
             return Math.round((endDate - startDate) / millisecondsPerDay);
         }
 
-        function formatSliderLabel(dateString) {
-            const parsed = parseLocalDate(dateString);
-            if (!parsed) {
-                return 'Select a date';
-            }
-
-            return parsed.toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-
         function buildPlannerState(stages) {
             const stageDates = stages
                 .map(function (stage) {
@@ -1239,7 +1218,7 @@
             slider.style.setProperty('--slider-progress', `${progress}%`);
         }
 
-        function syncSliderFromDate(dateInput, slider, label) {
+        function syncSliderFromDate(dateInput, slider) {
             const parsed = parseLocalDate(dateInput.value);
             if (!parsed || !editPlannerState) {
                 return;
@@ -1251,18 +1230,16 @@
             );
 
             slider.value = String(offset);
-            label.textContent = formatSliderLabel(dateInput.value);
             updateSliderProgress(slider);
         }
 
-        function syncDateFromSlider(slider, dateInput, label) {
+        function syncDateFromSlider(slider, dateInput) {
             if (!editPlannerState) {
                 return;
             }
 
             const selectedDate = addDays(editPlannerState.startDate, Number(slider.value));
             dateInput.value = formatInputDate(selectedDate);
-            label.textContent = formatSliderLabel(dateInput.value);
             updateSliderProgress(slider);
         }
 
@@ -1294,7 +1271,6 @@
                         <div class="edit-stage-scroll" style="width: ${editPlannerState.timelineWidth + 32}px;">
                             <div class="edit-stage-grid">${createPlannerGridMarkup(editPlannerState.months)}</div>
                             <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}" style="width: ${editPlannerState.timelineWidth}px; margin-left: 0;">
-                            <div class="edit-stage-slider-value">${formatSliderLabel(initialDate)}</div>
                         </div>
                     </div>
                     <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${initialDate}" required>
@@ -1302,17 +1278,16 @@
 
                 const slider = row.querySelector('.edit-stage-slider');
                 const dateInput = row.querySelector('.edit-stage-date');
-                const sliderValue = row.querySelector('.edit-stage-slider-value');
 
                 slider.addEventListener('input', function () {
-                    syncDateFromSlider(slider, dateInput, sliderValue);
+                    syncDateFromSlider(slider, dateInput);
                 });
 
                 dateInput.addEventListener('input', function () {
-                    syncSliderFromDate(dateInput, slider, sliderValue);
+                    syncSliderFromDate(dateInput, slider);
                 });
 
-                syncSliderFromDate(dateInput, slider, sliderValue);
+                syncSliderFromDate(dateInput, slider);
                 editStageContainer.appendChild(row);
 
                 if (stageIndex === 0) {
