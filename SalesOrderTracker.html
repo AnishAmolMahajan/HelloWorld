@@ -469,10 +469,20 @@
             border-left: 1px solid #dbe3f0;
             border-right: 1px solid #dbe3f0;
             min-width: 0;
+            overflow-x: auto;
+            cursor: grab;
+            scrollbar-width: thin;
+        }
+        .planner-header-scale.is-dragging {
+            cursor: grabbing;
+        }
+        .planner-scale-inner {
+            width: max-content;
+            min-width: 100%;
         }
         .planner-quarter-row,
         .planner-month-row {
-            display: grid;
+            display: flex;
             min-width: 100%;
         }
         .planner-quarter-cell {
@@ -482,6 +492,7 @@
             font-size: 0.82em;
             font-weight: 600;
             border-right: 1px solid rgba(255, 255, 255, 0.25);
+            flex: none;
         }
         .planner-quarter-cell:last-child {
             border-right: none;
@@ -493,6 +504,7 @@
             font-size: 0.85em;
             text-align: center;
             border-right: 1px solid #dbe3f0;
+            flex: none;
         }
         .planner-month-cell:last-child {
             border-right: none;
@@ -517,20 +529,37 @@
         .edit-stage-planner {
             position: relative;
             min-height: 72px;
-            padding: 14px 16px;
+            padding: 0;
             border-left: 1px solid #e2e8f0;
             border-right: 1px solid #e2e8f0;
             overflow: hidden;
+            overflow-x: auto;
+            cursor: grab;
+            scrollbar-width: thin;
+        }
+        .edit-stage-planner.is-dragging {
+            cursor: grabbing;
+        }
+        .edit-stage-scroll {
+            position: relative;
+            width: max-content;
+            min-width: 100%;
+            min-height: 72px;
+            padding: 14px 16px;
         }
         .edit-stage-grid {
             position: absolute;
-            inset: 0;
-            display: grid;
+            top: 14px;
+            left: 16px;
+            display: flex;
             pointer-events: none;
+            height: 44px;
         }
         .edit-stage-grid-cell {
             border-right: 1px solid #dbe3f0;
             background: linear-gradient(to bottom, rgba(79, 125, 194, 0.06), rgba(79, 125, 194, 0.02));
+            flex: none;
+            height: 44px;
         }
         .edit-stage-grid-cell:last-child {
             border-right: none;
@@ -655,6 +684,9 @@
             .edit-stage-planner {
                 border-right: none;
                 border-left: none;
+            }
+            .edit-stage-scroll {
+                min-width: 720px;
             }
             .edit-stage-date {
                 width: 100%;
@@ -793,6 +825,7 @@
         const editSaveBtn = document.getElementById('editSaveBtn');
         let editingShipmentIndex = null;
         let editPlannerState = null;
+        let suppressPlannerScrollSync = false;
 
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
 
@@ -1009,6 +1042,15 @@
             return new Date(date.getFullYear(), date.getMonth() + 1, 0);
         }
 
+        function startOfQuarter(date) {
+            const quarterMonth = Math.floor(date.getMonth() / 3) * 3;
+            return new Date(date.getFullYear(), quarterMonth, 1);
+        }
+
+        function daysInMonth(date) {
+            return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        }
+
         function daysBetween(startDate, endDate) {
             const millisecondsPerDay = 24 * 60 * 60 * 1000;
             return Math.round((endDate - startDate) / millisecondsPerDay);
@@ -1046,21 +1088,25 @@
                 })
                 : addDays(anchorDate, 90);
 
-            const rangeStart = startOfMonth(addDays(minimumDate, -14));
-            const tentativeEnd = endOfMonth(addDays(maximumDate, 45));
-            const minimumEnd = endOfMonth(addDays(rangeStart, 90));
+            const rangeStart = startOfQuarter(addDays(minimumDate, -180));
+            const tentativeEnd = endOfMonth(addDays(maximumDate, 210));
+            const minimumEnd = endOfMonth(addDays(rangeStart, 365));
             const rangeEnd = tentativeEnd > minimumEnd ? tentativeEnd : minimumEnd;
             const totalDays = Math.max(daysBetween(rangeStart, rangeEnd), 1);
             const months = [];
             const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+            const dayWidth = 6;
 
             while (cursor <= rangeEnd) {
+                const monthDate = new Date(cursor);
                 months.push({
-                    label: cursor.toLocaleDateString(undefined, {
+                    label: monthDate.toLocaleDateString(undefined, {
                         month: 'short',
                         year: '2-digit'
                     }),
-                    quarter: `Q${Math.floor(cursor.getMonth() / 3) + 1} ${cursor.getFullYear()}`
+                    quarter: `Q${Math.floor(monthDate.getMonth() / 3) + 1} ${monthDate.getFullYear()}`,
+                    days: daysInMonth(monthDate),
+                    width: daysInMonth(monthDate) * dayWidth
                 });
                 cursor.setMonth(cursor.getMonth() + 1);
             }
@@ -1069,7 +1115,9 @@
                 startDate: rangeStart,
                 endDate: rangeEnd,
                 totalDays,
-                months
+                months,
+                dayWidth,
+                timelineWidth: totalDays * dayWidth
             };
         }
 
@@ -1079,36 +1127,110 @@
                 return;
             }
 
-            const monthColumns = `repeat(${plannerState.months.length}, minmax(72px, 1fr))`;
             const quarterGroups = [];
 
             plannerState.months.forEach(function (month) {
                 const lastQuarter = quarterGroups[quarterGroups.length - 1];
                 if (lastQuarter && lastQuarter.label === month.quarter) {
                     lastQuarter.span += 1;
+                    lastQuarter.width += month.width;
                 } else {
-                    quarterGroups.push({ label: month.quarter, span: 1 });
+                    quarterGroups.push({ label: month.quarter, span: 1, width: month.width });
                 }
             });
 
             editPlannerHeader.innerHTML = `
-                <div class="planner-quarter-row" style="grid-template-columns: ${quarterGroups.map(function (group) { return `${group.span}fr`; }).join(' ')};">
+                <div class="planner-scale-inner" style="padding: 0 16px; width: ${plannerState.timelineWidth + 32}px;">
+                <div class="planner-quarter-row">
                     ${quarterGroups.map(function (group) {
-                        return `<div class="planner-quarter-cell">${group.label}</div>`;
+                        return `<div class="planner-quarter-cell" style="width: ${group.width}px;">${group.label}</div>`;
                     }).join('')}
                 </div>
-                <div class="planner-month-row" style="grid-template-columns: ${monthColumns};">
+                <div class="planner-month-row">
                     ${plannerState.months.map(function (month) {
-                        return `<div class="planner-month-cell">${month.label}</div>`;
+                        return `<div class="planner-month-cell" style="width: ${month.width}px;">${month.label}</div>`;
                     }).join('')}
+                </div>
                 </div>
             `;
         }
 
-        function createPlannerGridMarkup(monthCount) {
-            return Array.from({ length: monthCount }, function () {
-                return '<span class="edit-stage-grid-cell"></span>';
+        function createPlannerGridMarkup(months) {
+            return months.map(function (month) {
+                return `<span class="edit-stage-grid-cell" style="width: ${month.width}px;"></span>`;
             }).join('');
+        }
+
+        function getPlannerScrollAreas() {
+            return [editPlannerHeader].concat(Array.from(editStageContainer.querySelectorAll('.edit-stage-planner')));
+        }
+
+        function syncPlannerScroll(source) {
+            if (suppressPlannerScrollSync) {
+                return;
+            }
+
+            suppressPlannerScrollSync = true;
+            getPlannerScrollAreas().forEach(function (area) {
+                if (area !== source) {
+                    area.scrollLeft = source.scrollLeft;
+                }
+            });
+            suppressPlannerScrollSync = false;
+        }
+
+        function attachPlannerDrag(area) {
+            let isDragging = false;
+            let startX = 0;
+            let startScrollLeft = 0;
+
+            area.addEventListener('pointerdown', function (event) {
+                isDragging = true;
+                startX = event.clientX;
+                startScrollLeft = area.scrollLeft;
+                area.classList.add('is-dragging');
+                area.setPointerCapture(event.pointerId);
+            });
+
+            area.addEventListener('pointermove', function (event) {
+                if (!isDragging) {
+                    return;
+                }
+
+                const delta = event.clientX - startX;
+                area.scrollLeft = startScrollLeft - delta;
+                syncPlannerScroll(area);
+            });
+
+            function stopDragging(event) {
+                if (!isDragging) {
+                    return;
+                }
+
+                isDragging = false;
+                area.classList.remove('is-dragging');
+                if (event && area.hasPointerCapture(event.pointerId)) {
+                    area.releasePointerCapture(event.pointerId);
+                }
+            }
+
+            area.addEventListener('pointerup', stopDragging);
+            area.addEventListener('pointercancel', stopDragging);
+            area.addEventListener('scroll', function () {
+                syncPlannerScroll(area);
+            });
+        }
+
+        function setupPlannerInteractions(initialScrollLeft) {
+            const areas = getPlannerScrollAreas();
+            areas.forEach(function (area) {
+                attachPlannerDrag(area);
+            });
+
+            const scrollLeft = Math.max(0, initialScrollLeft || 0);
+            areas.forEach(function (area) {
+                area.scrollLeft = scrollLeft;
+            });
         }
 
         function updateSliderProgress(slider) {
@@ -1156,6 +1278,7 @@
             editPlannerState = buildPlannerState(shipment.timeline);
             renderPlannerHeader(editPlannerState);
             editStageContainer.innerHTML = '';
+            let initialScrollLeft = 0;
 
             shipment.timeline.forEach(function (stage, stageIndex) {
                 const row = document.createElement('div');
@@ -1170,9 +1293,11 @@
                 row.innerHTML = `
                     <div class="edit-stage-name">${stage.name}</div>
                     <div class="edit-stage-planner">
-                        <div class="edit-stage-grid" style="grid-template-columns: repeat(${editPlannerState.months.length}, minmax(0, 1fr));">${createPlannerGridMarkup(editPlannerState.months.length)}</div>
-                        <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}">
-                        <div class="edit-stage-slider-value">${formatSliderLabel(initialDate)}</div>
+                        <div class="edit-stage-scroll" style="width: ${editPlannerState.timelineWidth + 32}px;">
+                            <div class="edit-stage-grid">${createPlannerGridMarkup(editPlannerState.months)}</div>
+                            <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}" style="width: ${editPlannerState.timelineWidth}px; margin-left: 0;">
+                            <div class="edit-stage-slider-value">${formatSliderLabel(initialDate)}</div>
+                        </div>
                     </div>
                     <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${initialDate}" required>
                 `;
@@ -1191,7 +1316,13 @@
 
                 syncSliderFromDate(dateInput, slider, sliderValue);
                 editStageContainer.appendChild(row);
+
+                if (stageIndex === 0) {
+                    initialScrollLeft = Math.max(0, initialOffset * editPlannerState.dayWidth - 120);
+                }
             });
+
+            setupPlannerInteractions(initialScrollLeft);
 
             editModal.classList.add('open');
             editModal.setAttribute('aria-hidden', 'false');
