@@ -19,6 +19,7 @@
             font-family: 'Poppins', sans-serif;
         }
         header {
+            position: relative;
             background-color: #ffffff;
             padding: 20px;
             text-align: center;
@@ -28,6 +29,35 @@
             color: #1f2937;
             font-size: 1.5em;
             text-shadow: none;
+        }
+        .page-meta {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background-color: #eef4ff;
+            border: 1px solid #c4d7ff;
+            color: #1e3a8a;
+            box-shadow: 0 10px 24px rgba(30, 58, 138, 0.08);
+            text-align: left;
+        }
+        .page-meta-label {
+            color: #64748b;
+            font-size: 0.72em;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .page-meta-value {
+            color: #1e3a8a;
+            font-size: 0.88em;
+            font-weight: 600;
+            white-space: nowrap;
         }
         main {
             flex: 1;
@@ -379,7 +409,7 @@
             display: flex;
         }
         .modal-card {
-            width: min(700px, 100%);
+            width: min(1080px, 100%);
             max-height: 85vh;
             overflow-y: auto;
             background-color: #ffffff;
@@ -399,6 +429,11 @@
             font-size: 1.2em;
             font-weight: 700;
         }
+        .modal-subtitle {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 0.9em;
+        }
         .modal-close {
             border: none;
             background: transparent;
@@ -407,13 +442,68 @@
             cursor: pointer;
             line-height: 1;
         }
+        .edit-planner-board {
+            border: 1px solid #dbe3f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #f8fbff;
+        }
+        .planner-header {
+            display: grid;
+            grid-template-columns: 220px minmax(380px, 1fr) 170px;
+            align-items: stretch;
+            border-bottom: 1px solid #dbe3f0;
+            background-color: #edf4ff;
+        }
+        .planner-header-title,
+        .planner-header-date {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            color: #1e3a8a;
+            font-size: 0.9em;
+            font-weight: 700;
+        }
+        .planner-header-scale {
+            padding: 0;
+            border-left: 1px solid #dbe3f0;
+            border-right: 1px solid #dbe3f0;
+            min-width: 0;
+        }
+        .planner-quarter-row,
+        .planner-month-row {
+            display: grid;
+            min-width: 100%;
+        }
+        .planner-quarter-cell {
+            padding: 8px 10px;
+            background-color: #4f7dc2;
+            color: #ffffff;
+            font-size: 0.82em;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .planner-quarter-cell:last-child {
+            border-right: none;
+        }
+        .planner-month-cell {
+            padding: 10px 8px;
+            background-color: #ffffff;
+            color: #1f2937;
+            font-size: 0.85em;
+            text-align: center;
+            border-right: 1px solid #dbe3f0;
+        }
+        .planner-month-cell:last-child {
+            border-right: none;
+        }
         .edit-stage-row {
             display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
+            grid-template-columns: 220px minmax(380px, 1fr) 170px;
+            gap: 0;
             align-items: center;
-            padding: 10px 0;
             border-top: 1px solid #e2e8f0;
+            background-color: #ffffff;
         }
         .edit-stage-row:first-of-type {
             border-top: none;
@@ -421,9 +511,72 @@
         .edit-stage-name {
             color: #334155;
             font-size: 0.95em;
+            font-weight: 600;
+            padding: 16px;
+        }
+        .edit-stage-planner {
+            position: relative;
+            min-height: 72px;
+            padding: 14px 16px;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .edit-stage-grid {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            pointer-events: none;
+        }
+        .edit-stage-grid-cell {
+            border-right: 1px solid #dbe3f0;
+            background: linear-gradient(to bottom, rgba(79, 125, 194, 0.06), rgba(79, 125, 194, 0.02));
+        }
+        .edit-stage-grid-cell:last-child {
+            border-right: none;
+        }
+        .edit-stage-slider {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            margin-top: 18px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(to right, #68a7df 0%, #68a7df var(--slider-progress, 0%), #d9e7f8 var(--slider-progress, 0%), #d9e7f8 100%);
+            outline: none;
+        }
+        .edit-stage-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #1d4ed8;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+            cursor: pointer;
+        }
+        .edit-stage-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #1d4ed8;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+            cursor: pointer;
+        }
+        .edit-stage-slider-value {
+            position: relative;
+            z-index: 1;
+            margin-top: 10px;
+            color: #1d4ed8;
+            font-size: 0.82em;
+            font-weight: 600;
         }
         .edit-stage-date {
-            width: 170px;
+            width: calc(100% - 32px);
             padding: 8px 10px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
@@ -431,6 +584,7 @@
             color: #1f2937;
             font-family: 'Poppins', sans-serif;
             font-size: 0.9em;
+            margin: 0 16px;
         }
         .modal-actions {
             display: flex;
@@ -463,6 +617,17 @@
             font-size: 0.9em;
         }
         @media (max-width: 640px) {
+            header {
+                padding-top: 18px;
+            }
+            .page-meta {
+                position: static;
+                transform: none;
+                width: fit-content;
+                margin: 12px auto 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
             main h1 {
                 font-size: 2.3em;
                 text-align: center;
@@ -480,11 +645,20 @@
             .stage-config-date {
                 width: 100%;
             }
+            .planner-header {
+                display: none;
+            }
             .edit-stage-row {
                 grid-template-columns: 1fr;
             }
+            .edit-stage-name,
+            .edit-stage-planner {
+                border-right: none;
+                border-left: none;
+            }
             .edit-stage-date {
                 width: 100%;
+                margin: 0;
             }
         }
     </style>
@@ -492,6 +666,12 @@
 <body>
     <header>
         <h1>My Website</h1>
+        <div class="page-meta" aria-label="Build information">
+            <span class="page-meta-label">Commit</span>
+            <span class="page-meta-value">8729e55</span>
+            <span class="page-meta-label">Updated</span>
+            <span class="page-meta-value">2026-03-21 07:04:16</span>
+        </div>
     </header>
     <main>
         <h1>Sales Order Tracker</h1>
@@ -538,10 +718,20 @@
     <div class="modal-overlay" id="editModal" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
             <div class="modal-header">
-                <div class="modal-title" id="editModalTitle">Edit Shipment Dates</div>
+                <div>
+                    <div class="modal-title" id="editModalTitle">Edit Shipment Dates</div>
+                    <div class="modal-subtitle">Use the planner slider or type the date manually for each stage.</div>
+                </div>
                 <button type="button" class="modal-close" id="editModalClose" aria-label="Close">&times;</button>
             </div>
-            <div id="editStageContainer"></div>
+            <div class="edit-planner-board">
+                <div class="planner-header">
+                    <div class="planner-header-title">Stage</div>
+                    <div class="planner-header-scale" id="editPlannerHeader"></div>
+                    <div class="planner-header-date">Date</div>
+                </div>
+                <div id="editStageContainer"></div>
+            </div>
             <div class="modal-actions">
                 <button type="button" class="modal-btn modal-btn-cancel" id="editCancelBtn">Cancel</button>
                 <button type="button" class="modal-btn modal-btn-save" id="editSaveBtn">Save Changes</button>
@@ -596,11 +786,13 @@
         const stageConfigSection = document.getElementById('stageConfigSection');
         const stageConfigContainer = document.getElementById('stageConfigContainer');
         const editModal = document.getElementById('editModal');
+        const editPlannerHeader = document.getElementById('editPlannerHeader');
         const editStageContainer = document.getElementById('editStageContainer');
         const editModalClose = document.getElementById('editModalClose');
         const editCancelBtn = document.getElementById('editCancelBtn');
         const editSaveBtn = document.getElementById('editSaveBtn');
         let editingShipmentIndex = null;
+        let editPlannerState = null;
 
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
 
@@ -787,6 +979,173 @@
             displayShipments();
         }
 
+        function parseLocalDate(dateString) {
+            if (!dateString) {
+                return null;
+            }
+
+            const parts = dateString.split('-').map(Number);
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        function formatInputDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function addDays(date, days) {
+            const updated = new Date(date);
+            updated.setDate(updated.getDate() + days);
+            return updated;
+        }
+
+        function startOfMonth(date) {
+            return new Date(date.getFullYear(), date.getMonth(), 1);
+        }
+
+        function endOfMonth(date) {
+            return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        }
+
+        function daysBetween(startDate, endDate) {
+            const millisecondsPerDay = 24 * 60 * 60 * 1000;
+            return Math.round((endDate - startDate) / millisecondsPerDay);
+        }
+
+        function formatSliderLabel(dateString) {
+            const parsed = parseLocalDate(dateString);
+            if (!parsed) {
+                return 'Select a date';
+            }
+
+            return parsed.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function buildPlannerState(stages) {
+            const stageDates = stages
+                .map(function (stage) {
+                    return parseLocalDate(stage.date);
+                })
+                .filter(Boolean);
+
+            const anchorDate = stageDates.length ? stageDates[0] : new Date();
+            const minimumDate = stageDates.length
+                ? stageDates.reduce(function (earliest, current) {
+                    return current < earliest ? current : earliest;
+                })
+                : anchorDate;
+            const maximumDate = stageDates.length
+                ? stageDates.reduce(function (latest, current) {
+                    return current > latest ? current : latest;
+                })
+                : addDays(anchorDate, 90);
+
+            const rangeStart = startOfMonth(addDays(minimumDate, -14));
+            const tentativeEnd = endOfMonth(addDays(maximumDate, 45));
+            const minimumEnd = endOfMonth(addDays(rangeStart, 90));
+            const rangeEnd = tentativeEnd > minimumEnd ? tentativeEnd : minimumEnd;
+            const totalDays = Math.max(daysBetween(rangeStart, rangeEnd), 1);
+            const months = [];
+            const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+
+            while (cursor <= rangeEnd) {
+                months.push({
+                    label: cursor.toLocaleDateString(undefined, {
+                        month: 'short',
+                        year: '2-digit'
+                    }),
+                    quarter: `Q${Math.floor(cursor.getMonth() / 3) + 1} ${cursor.getFullYear()}`
+                });
+                cursor.setMonth(cursor.getMonth() + 1);
+            }
+
+            return {
+                startDate: rangeStart,
+                endDate: rangeEnd,
+                totalDays,
+                months
+            };
+        }
+
+        function renderPlannerHeader(plannerState) {
+            if (!plannerState) {
+                editPlannerHeader.innerHTML = '';
+                return;
+            }
+
+            const monthColumns = `repeat(${plannerState.months.length}, minmax(72px, 1fr))`;
+            const quarterGroups = [];
+
+            plannerState.months.forEach(function (month) {
+                const lastQuarter = quarterGroups[quarterGroups.length - 1];
+                if (lastQuarter && lastQuarter.label === month.quarter) {
+                    lastQuarter.span += 1;
+                } else {
+                    quarterGroups.push({ label: month.quarter, span: 1 });
+                }
+            });
+
+            editPlannerHeader.innerHTML = `
+                <div class="planner-quarter-row" style="grid-template-columns: ${quarterGroups.map(function (group) { return `${group.span}fr`; }).join(' ')};">
+                    ${quarterGroups.map(function (group) {
+                        return `<div class="planner-quarter-cell">${group.label}</div>`;
+                    }).join('')}
+                </div>
+                <div class="planner-month-row" style="grid-template-columns: ${monthColumns};">
+                    ${plannerState.months.map(function (month) {
+                        return `<div class="planner-month-cell">${month.label}</div>`;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function createPlannerGridMarkup(monthCount) {
+            return Array.from({ length: monthCount }, function () {
+                return '<span class="edit-stage-grid-cell"></span>';
+            }).join('');
+        }
+
+        function updateSliderProgress(slider) {
+            const min = Number(slider.min) || 0;
+            const max = Number(slider.max) || 1;
+            const value = Number(slider.value) || 0;
+            const progress = max === min ? 0 : ((value - min) / (max - min)) * 100;
+            slider.style.setProperty('--slider-progress', `${progress}%`);
+        }
+
+        function syncSliderFromDate(dateInput, slider, label) {
+            const parsed = parseLocalDate(dateInput.value);
+            if (!parsed || !editPlannerState) {
+                return;
+            }
+
+            const offset = Math.min(
+                editPlannerState.totalDays,
+                Math.max(0, daysBetween(editPlannerState.startDate, parsed))
+            );
+
+            slider.value = String(offset);
+            label.textContent = formatSliderLabel(dateInput.value);
+            updateSliderProgress(slider);
+        }
+
+        function syncDateFromSlider(slider, dateInput, label) {
+            if (!editPlannerState) {
+                return;
+            }
+
+            const selectedDate = addDays(editPlannerState.startDate, Number(slider.value));
+            dateInput.value = formatInputDate(selectedDate);
+            label.textContent = formatSliderLabel(dateInput.value);
+            updateSliderProgress(slider);
+        }
+
         function openEditShipment(index) {
             const shipment = shipments[index];
             if (!shipment) {
@@ -794,15 +1153,43 @@
             }
 
             editingShipmentIndex = index;
+            editPlannerState = buildPlannerState(shipment.timeline);
+            renderPlannerHeader(editPlannerState);
             editStageContainer.innerHTML = '';
 
             shipment.timeline.forEach(function (stage, stageIndex) {
                 const row = document.createElement('div');
                 row.className = 'edit-stage-row';
+                const initialDate = stage.date || formatInputDate(new Date());
+                const initialOffset = editPlannerState
+                    ? Math.min(
+                        editPlannerState.totalDays,
+                        Math.max(0, daysBetween(editPlannerState.startDate, parseLocalDate(initialDate)))
+                    )
+                    : 0;
                 row.innerHTML = `
                     <div class="edit-stage-name">${stage.name}</div>
-                    <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${stage.date || ''}" required>
+                    <div class="edit-stage-planner">
+                        <div class="edit-stage-grid" style="grid-template-columns: repeat(${editPlannerState.months.length}, minmax(0, 1fr));">${createPlannerGridMarkup(editPlannerState.months.length)}</div>
+                        <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}">
+                        <div class="edit-stage-slider-value">${formatSliderLabel(initialDate)}</div>
+                    </div>
+                    <input type="date" class="edit-stage-date" data-stage-index="${stageIndex}" value="${initialDate}" required>
                 `;
+
+                const slider = row.querySelector('.edit-stage-slider');
+                const dateInput = row.querySelector('.edit-stage-date');
+                const sliderValue = row.querySelector('.edit-stage-slider-value');
+
+                slider.addEventListener('input', function () {
+                    syncDateFromSlider(slider, dateInput, sliderValue);
+                });
+
+                dateInput.addEventListener('input', function () {
+                    syncSliderFromDate(dateInput, slider, sliderValue);
+                });
+
+                syncSliderFromDate(dateInput, slider, sliderValue);
                 editStageContainer.appendChild(row);
             });
 
@@ -814,6 +1201,8 @@
             editModal.classList.remove('open');
             editModal.setAttribute('aria-hidden', 'true');
             editingShipmentIndex = null;
+            editPlannerState = null;
+            editPlannerHeader.innerHTML = '';
             editStageContainer.innerHTML = '';
         }
 
