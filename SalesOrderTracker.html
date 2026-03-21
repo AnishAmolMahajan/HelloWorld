@@ -329,6 +329,9 @@
             border-right: 1px solid #e2e8f0;
             overflow: hidden;
         }
+        .stage-config-planner.is-hidden {
+            visibility: hidden;
+        }
         .stage-config-scroll {
             position: relative;
             width: max-content;
@@ -1035,12 +1038,14 @@
                 if (!isMandatory) {
                     const checkbox = row.querySelector('.stage-applicable-checkbox');
                     const pill = row.querySelector('.stage-pill');
+                    const plannerCell = row.querySelector('.stage-config-planner');
 
                     checkbox.addEventListener('change', function () {
                         const applicable = checkbox.checked;
                         sliderInput.disabled = !applicable;
                         dateInput.disabled = !applicable;
                         dateInput.required = applicable;
+                        plannerCell.classList.toggle('is-hidden', !applicable);
                         pill.textContent = applicable ? 'Applicable' : 'Not Applicable';
                     });
                 }
