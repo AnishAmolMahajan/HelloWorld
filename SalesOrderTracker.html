@@ -58,27 +58,6 @@
             text-align: left;
             line-height: 1.6;
         }
-        .shipment-types {
-            margin-top: 28px;
-            color: #334155;
-        }
-        .shipment-types h3 {
-            font-size: 1.3em;
-            margin-bottom: 16px;
-            color: #1d4ed8;
-        }
-        .shipment-type {
-            background-color: #eef4ff;
-            padding: 14px;
-            margin-bottom: 12px;
-            border-left: 4px solid #1d4ed8;
-            border-radius: 6px;
-        }
-        .shipment-type strong {
-            color: #1d4ed8;
-            display: block;
-            margin-bottom: 6px;
-        }
         .back-link {
             margin-top: 30px;
         }
@@ -282,6 +261,57 @@
             border-color: #1d4ed8;
             color: #ffffff;
         }
+        .stage-config-section {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            background-color: #eef4ff;
+            border: 1px solid #c4d7ff;
+        }
+        .stage-config-section h4 {
+            color: #1d4ed8;
+            margin-bottom: 10px;
+            font-size: 1.02em;
+        }
+        .stage-config-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-top: 1px solid #dbe8ff;
+        }
+        .stage-config-row:first-of-type {
+            border-top: none;
+        }
+        .stage-config-name {
+            color: #334155;
+            font-size: 0.95em;
+        }
+        .stage-config-date {
+            width: 155px;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #1f2937;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+        }
+        .stage-config-date:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .mandatory-pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid #1d4ed8;
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
         .shipments-list h3 {
             color: #1d4ed8;
             font-size: 1.3em;
@@ -375,6 +405,13 @@
             .points-paragraph {
                 font-size: 1.02em;
             }
+            .stage-config-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .stage-config-date {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -386,26 +423,6 @@
         <h1>Sales Order Tracker</h1>
         <section class="content-card">
             <p class="points-paragraph">Sales Order Tracking is a critical component of supply chain management that enables businesses to monitor the status and progress of customer orders from placement through delivery. Each sales order can contain multiple shipments to clients, with each shipment having a specific type that categorizes its purpose and handling requirements. Effective tracking systems provide real-time visibility into order fulfillment, inventory allocation, and logistics operations, allowing teams to identify bottlenecks and respond quickly to delays. Modern order trackers integrate data from multiple systems including inventory management, warehouse operations, and shipping logistics to create a unified view of each order's journey and its associated shipments.</p>
-
-            <div class="shipment-types">
-                <h3>Shipment Types</h3>
-                <div class="shipment-type">
-                    <strong>Stock Shipment</strong>
-                    <p>Standard shipment of finished goods directly from inventory to the client for order fulfillment.</p>
-                </div>
-                <div class="shipment-type">
-                    <strong>Stock Machining Shipment</strong>
-                    <p>Shipment involving goods that require preprocessing, customization, or light machining operations before reaching the client.</p>
-                </div>
-                <div class="shipment-type">
-                    <strong>Stock Incoming Shipment</strong>
-                    <p>Shipment of raw materials or components received from suppliers that need to be processed or assembled into finished goods.</p>
-                </div>
-                <div class="shipment-type">
-                    <strong>Supplier Shipment</strong>
-                    <p>Direct shipment from the supplier to the client, often used for items not held in stock or for drop-shipping arrangements.</p>
-                </div>
-            </div>
 
             <div class="add-shipment-section">
                 <h3>Add New Shipment</h3>
@@ -424,17 +441,13 @@
                             <option value="Supplier Shipment">Supplier Shipment</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="shipmentDate">Shipment Date:</label>
-                        <input type="date" id="shipmentDate" name="shipmentDate" required>
-                    </div>
                     <div class="optional-stages-section" id="optionalStagesSection" style="display: none;">
                         <h4>Optional Date Applicability</h4>
                         <div id="optionalStagesContainer"></div>
                     </div>
-                    <div class="preview-section" id="timelinePreview" style="display: none;">
-                        <h4>Timeline Preview (Before Add)</h4>
-                        <div id="timelinePreviewContainer"></div>
+                    <div class="stage-config-section" id="stageConfigSection" style="display: none;">
+                        <h4>Stage Dates (One Line Per Stage)</h4>
+                        <div id="stageConfigContainer"></div>
                     </div>
                     <button type="submit" class="add-shipment-btn">Add Shipment</button>
                 </form>
@@ -498,30 +511,31 @@
         let shipments = [];
         const shipmentForm = document.getElementById('shipmentForm');
         const shipmentTypeInput = document.getElementById('shipmentType');
-        const shipmentDateInput = document.getElementById('shipmentDate');
         const optionalStagesSection = document.getElementById('optionalStagesSection');
         const optionalStagesContainer = document.getElementById('optionalStagesContainer');
-        const timelinePreview = document.getElementById('timelinePreview');
-        const timelinePreviewContainer = document.getElementById('timelinePreviewContainer');
+        const stageConfigSection = document.getElementById('stageConfigSection');
+        const stageConfigContainer = document.getElementById('stageConfigContainer');
 
         shipmentTypeInput.addEventListener('change', function () {
             updateOptionalStageSelectors();
-            updateTimelinePreview();
+            renderStageConfigRows();
         });
-        shipmentDateInput.addEventListener('change', updateTimelinePreview);
 
         shipmentForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const shipmentId = document.getElementById('shipmentId').value;
             const shipmentType = document.getElementById('shipmentType').value;
-            const shipmentDate = document.getElementById('shipmentDate').value;
+            const timeline = getSelectedTimelineWithDates(shipmentType);
+
+            if (!timeline.length) {
+                return;
+            }
 
             const shipment = {
                 id: shipmentId,
                 type: shipmentType,
-                date: new Date(shipmentDate),
-                timeline: getApplicableTimelineForType(shipmentType)
+                timeline
             };
 
             shipments.push(shipment);
@@ -529,8 +543,8 @@
             this.reset();
             optionalStagesSection.style.display = 'none';
             optionalStagesContainer.innerHTML = '';
-            timelinePreview.style.display = 'none';
-            timelinePreviewContainer.innerHTML = '';
+            stageConfigSection.style.display = 'none';
+            stageConfigContainer.innerHTML = '';
         });
 
         function updateOptionalStageSelectors() {
@@ -568,7 +582,7 @@
             optionalStagesSection.style.display = 'block';
 
             optionalStagesContainer.querySelectorAll('.optional-stage-checkbox').forEach(function (checkbox) {
-                checkbox.addEventListener('change', updateTimelinePreview);
+                checkbox.addEventListener('change', renderStageConfigRows);
             });
         }
 
@@ -590,19 +604,80 @@
             });
         }
 
-        function buildTimelineMarkup(stages, startDate) {
+        function renderStageConfigRows() {
+            const selectedType = shipmentTypeInput.value;
+            stageConfigContainer.innerHTML = '';
+
+            if (!selectedType) {
+                stageConfigSection.style.display = 'none';
+                return;
+            }
+
+            const applicableStages = getApplicableTimelineForType(selectedType);
+            if (!applicableStages.length) {
+                stageConfigSection.style.display = 'none';
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            applicableStages.forEach(function (stageName) {
+                const originalStage = (shipmentTimelines[selectedType] || []).find(function (s) {
+                    return s.name === stageName;
+                });
+                const isMandatory = originalStage ? originalStage.mandatory : true;
+
+                const row = document.createElement('div');
+                row.className = 'stage-config-row';
+                row.innerHTML = `
+                    <div class="stage-config-name">${stageName}</div>
+                    <input type="date" class="stage-config-date" data-stage-name="${stageName}" value="${today}" required>
+                    ${isMandatory
+                        ? '<span class="mandatory-pill">Mandatory</span>'
+                        : '<span class="stage-pill">Optional</span>'}
+                `;
+                stageConfigContainer.appendChild(row);
+            });
+
+            stageConfigSection.style.display = 'block';
+        }
+
+        function getSelectedTimelineWithDates(type) {
+            const applicableStages = getApplicableTimelineForType(type);
+            const dateInputs = stageConfigContainer.querySelectorAll('.stage-config-date');
+
+            const selectedTimeline = applicableStages.map(function (stageName, index) {
+                const dateValue = dateInputs[index] ? dateInputs[index].value : '';
+                return {
+                    name: stageName,
+                    date: dateValue
+                };
+            });
+
+            const hasMissingDate = selectedTimeline.some(function (stage) {
+                return !stage.date;
+            });
+
+            if (hasMissingDate) {
+                alert('Please select a date for each applicable stage before adding the shipment.');
+                return [];
+            }
+
+            return selectedTimeline;
+        }
+
+        function buildTimelineMarkup(stages) {
             let timelineHTML = '<div class="timeline">';
 
-            stages.forEach((stage, stageIndex) => {
-                const stageDate = new Date(startDate);
-                stageDate.setDate(stageDate.getDate() + stageIndex);
+            stages.forEach((stage) => {
+                const stageDate = stage.date ? new Date(stage.date) : null;
 
                 timelineHTML += `
                     <div class="timeline-stage">
                         <div class="stage-indicator"></div>
                         <div class="stage-content">
-                            <div class="stage-name">${stage}</div>
-                            <div class="stage-date">${stageDate.toLocaleDateString()}</div>
+                            <div class="stage-name">${stage.name}</div>
+                            <div class="stage-date">${stageDate ? stageDate.toLocaleDateString() : '-'}</div>
                         </div>
                     </div>
                 `;
@@ -610,23 +685,6 @@
 
             timelineHTML += '</div>';
             return timelineHTML;
-        }
-
-        function updateTimelinePreview() {
-            const selectedType = shipmentTypeInput.value;
-            const selectedDate = shipmentDateInput.value;
-
-            if (!selectedType || !selectedDate) {
-                timelinePreview.style.display = 'none';
-                timelinePreviewContainer.innerHTML = '';
-                return;
-            }
-
-            const stages = getApplicableTimelineForType(selectedType);
-            const startDate = new Date(selectedDate);
-
-            timelinePreviewContainer.innerHTML = buildTimelineMarkup(stages, startDate);
-            timelinePreview.style.display = 'block';
         }
 
         function displayShipments() {
@@ -645,7 +703,11 @@
                 const card = document.createElement('div');
                 card.className = 'shipment-card';
 
-                const timelineHTML = buildTimelineMarkup(shipment.timeline, shipment.date);
+                const timelineHTML = buildTimelineMarkup(shipment.timeline);
+
+                const firstStageDate = shipment.timeline.length > 0 && shipment.timeline[0].date
+                    ? new Date(shipment.timeline[0].date).toLocaleDateString()
+                    : '-';
 
                 card.innerHTML = `
                     <div class="shipment-header">
@@ -654,7 +716,7 @@
                     </div>
                     <div class="shipment-details">
                         <p><strong>Type:</strong> ${shipment.type}</p>
-                        <p><strong>Start Date:</strong> ${shipment.date.toLocaleDateString()}</p>
+                        <p><strong>First Stage Date:</strong> ${firstStageDate}</p>
                     </div>
                     ${timelineHTML}
                 `;
