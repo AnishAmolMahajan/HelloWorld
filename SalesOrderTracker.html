@@ -266,7 +266,7 @@
         }
         .stage-config-row {
             display: grid;
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 220px minmax(360px, 1fr) 170px auto;
             align-items: center;
             gap: 10px;
             padding: 8px 0;
@@ -280,7 +280,7 @@
             font-size: 0.95em;
         }
         .stage-config-date {
-            width: 155px;
+            width: 100%;
             padding: 8px 10px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
@@ -288,6 +288,102 @@
             color: #1f2937;
             font-family: 'Poppins', sans-serif;
             font-size: 0.9em;
+        }
+        .stage-config-header {
+            display: grid;
+            grid-template-columns: 220px minmax(360px, 1fr) 170px auto;
+            align-items: stretch;
+            border: 1px solid #c4d7ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            background-color: #edf4ff;
+        }
+        .stage-config-header-title,
+        .stage-config-header-date,
+        .stage-config-header-flag {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            color: #1e3a8a;
+            font-size: 0.84em;
+            font-weight: 700;
+        }
+        .stage-config-header-scale {
+            padding: 0;
+            border-left: 1px solid #dbe3f0;
+            border-right: 1px solid #dbe3f0;
+            min-width: 0;
+            overflow-x: auto;
+            cursor: grab;
+            scrollbar-width: thin;
+        }
+        .stage-config-header-scale.is-dragging {
+            cursor: grabbing;
+        }
+        .stage-config-planner {
+            position: relative;
+            min-height: 72px;
+            padding: 0;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .stage-config-scroll {
+            position: relative;
+            width: max-content;
+            min-width: 100%;
+            min-height: 72px;
+            padding: 14px 16px;
+        }
+        .stage-config-grid {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            display: flex;
+            pointer-events: none;
+            height: 44px;
+        }
+        .stage-config-grid-cell {
+            border-right: 1px solid #dbe3f0;
+            background: linear-gradient(to bottom, rgba(79, 125, 194, 0.06), rgba(79, 125, 194, 0.02));
+            flex: none;
+            height: 44px;
+        }
+        .stage-config-grid-cell:last-child {
+            border-right: none;
+        }
+        .stage-config-slider {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            margin-top: 14px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 18px;
+            border-radius: 999px;
+            background: linear-gradient(to right, #68a7df 0%, #68a7df var(--slider-progress, 0%), #d9e7f8 var(--slider-progress, 0%), #d9e7f8 100%);
+            outline: none;
+        }
+        .stage-config-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #1d4ed8;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+            cursor: pointer;
+        }
+        .stage-config-slider::-moz-range-thumb {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #1d4ed8;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+            cursor: pointer;
         }
         .stage-config-date:disabled {
             background-color: #f1f5f9;
@@ -713,6 +809,12 @@
                     </div>
                     <div class="stage-config-section" id="stageConfigSection" style="display: none;">
                         <h4>Stage Dates (One Line Per Stage)</h4>
+                        <div class="stage-config-header">
+                            <div class="stage-config-header-title">Stage</div>
+                            <div class="stage-config-header-scale" id="addPlannerHeader"></div>
+                            <div class="stage-config-header-date">Date</div>
+                            <div class="stage-config-header-flag">Status</div>
+                        </div>
                         <div id="stageConfigContainer"></div>
                     </div>
                     <button type="submit" class="add-shipment-btn">Add Shipment</button>
@@ -803,6 +905,7 @@
         const shipmentTypeInput = document.getElementById('shipmentType');
         const stageConfigSection = document.getElementById('stageConfigSection');
         const stageConfigContainer = document.getElementById('stageConfigContainer');
+        const addPlannerHeader = document.getElementById('addPlannerHeader');
         const editModal = document.getElementById('editModal');
         const editPlannerHeader = document.getElementById('editPlannerHeader');
         const editStageContainer = document.getElementById('editStageContainer');
@@ -810,7 +913,9 @@
         const editCancelBtn = document.getElementById('editCancelBtn');
         const editSaveBtn = document.getElementById('editSaveBtn');
         let editingShipmentIndex = null;
+        let addPlannerState = null;
         let editPlannerState = null;
+        let suppressAddPlannerScrollSync = false;
         let suppressPlannerScrollSync = false;
 
         shipmentTypeInput.addEventListener('change', renderStageConfigRows);
@@ -851,6 +956,8 @@
         function renderStageConfigRows() {
             const selectedType = shipmentTypeInput.value;
             stageConfigContainer.innerHTML = '';
+            addPlannerHeader.innerHTML = '';
+            addPlannerState = null;
 
             if (!selectedType) {
                 stageConfigSection.style.display = 'none';
@@ -864,9 +971,24 @@
             }
 
             const today = new Date().toISOString().split('T')[0];
+            const plannerSourceStages = stages.map(function (stage) {
+                return {
+                    name: stage.name,
+                    date: today
+                };
+            });
+            addPlannerState = buildPlannerState(plannerSourceStages);
+            renderPlannerHeader(addPlannerState, addPlannerHeader);
+            let initialScrollLeft = 0;
 
-            stages.forEach(function (stage) {
+            stages.forEach(function (stage, stageIndex) {
                 const isMandatory = stage.mandatory;
+                const initialOffset = addPlannerState
+                    ? Math.min(
+                        addPlannerState.totalDays,
+                        Math.max(0, daysBetween(addPlannerState.startDate, parseLocalDate(today)))
+                    )
+                    : 0;
 
                 const row = document.createElement('div');
                 row.className = 'stage-config-row';
@@ -874,6 +996,12 @@
                 row.dataset.mandatory = isMandatory ? 'true' : 'false';
                 row.innerHTML = `
                     <div class="stage-config-name">${stage.name}</div>
+                    <div class="stage-config-planner">
+                        <div class="stage-config-scroll" style="width: ${addPlannerState.timelineWidth + 32}px;">
+                            <div class="stage-config-grid">${createPlannerGridMarkup(addPlannerState.months, 'stage-config-grid-cell')}</div>
+                            <input type="range" class="stage-config-slider" data-stage-name="${stage.name}" min="0" max="${addPlannerState.totalDays}" value="${initialOffset}" style="width: ${addPlannerState.timelineWidth}px; margin-left: 0;">
+                        </div>
+                    </div>
                     <input type="date" class="stage-config-date" data-stage-name="${stage.name}" value="${today}" required>
                     ${isMandatory
                         ? '<span class="mandatory-pill">Mandatory</span>'
@@ -881,20 +1009,38 @@
                 `;
                 stageConfigContainer.appendChild(row);
 
+                const sliderInput = row.querySelector('.stage-config-slider');
+                const dateInput = row.querySelector('.stage-config-date');
+
+                sliderInput.addEventListener('input', function () {
+                    syncDateFromSlider(sliderInput, dateInput, addPlannerState);
+                });
+
+                dateInput.addEventListener('input', function () {
+                    syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+                });
+
+                syncSliderFromDate(dateInput, sliderInput, addPlannerState);
+
                 if (!isMandatory) {
                     const checkbox = row.querySelector('.stage-applicable-checkbox');
-                    const dateInput = row.querySelector('.stage-config-date');
                     const pill = row.querySelector('.stage-pill');
 
                     checkbox.addEventListener('change', function () {
                         const applicable = checkbox.checked;
+                        sliderInput.disabled = !applicable;
                         dateInput.disabled = !applicable;
                         dateInput.required = applicable;
                         pill.textContent = applicable ? 'Applicable' : 'Not Applicable';
                     });
                 }
+
+                if (stageIndex === 0) {
+                    initialScrollLeft = Math.max(0, initialOffset * addPlannerState.dayWidth - 120);
+                }
             });
 
+            setupAddPlannerInteractions(initialScrollLeft);
             stageConfigSection.style.display = 'block';
         }
 
@@ -1092,9 +1238,9 @@
             };
         }
 
-        function renderPlannerHeader(plannerState) {
+        function renderPlannerHeader(plannerState, targetElement) {
             if (!plannerState) {
-                editPlannerHeader.innerHTML = '';
+                targetElement.innerHTML = '';
                 return;
             }
 
@@ -1110,7 +1256,7 @@
                 }
             });
 
-            editPlannerHeader.innerHTML = `
+            targetElement.innerHTML = `
                 <div class="planner-scale-inner" style="padding: 0 16px; width: ${plannerState.timelineWidth + 32}px;">
                 <div class="planner-quarter-row">
                     ${quarterGroups.map(function (group) {
@@ -1126,10 +1272,28 @@
             `;
         }
 
-        function createPlannerGridMarkup(months) {
+        function createPlannerGridMarkup(months, cellClassName) {
             return months.map(function (month) {
-                return `<span class="edit-stage-grid-cell" style="width: ${month.width}px;"></span>`;
+                return `<span class="${cellClassName}" style="width: ${month.width}px;"></span>`;
             }).join('');
+        }
+
+        function getAddPlannerScrollAreas() {
+            return [addPlannerHeader].concat(Array.from(stageConfigContainer.querySelectorAll('.stage-config-planner')));
+        }
+
+        function syncAddPlannerScroll(source) {
+            if (suppressAddPlannerScrollSync) {
+                return;
+            }
+
+            suppressAddPlannerScrollSync = true;
+            getAddPlannerScrollAreas().forEach(function (area) {
+                if (area !== source) {
+                    area.scrollLeft = source.scrollLeft;
+                }
+            });
+            suppressAddPlannerScrollSync = false;
         }
 
         function getPlannerScrollAreas() {
@@ -1150,7 +1314,12 @@
             suppressPlannerScrollSync = false;
         }
 
-        function attachPlannerDrag(area) {
+        function attachPlannerDrag(area, onSync) {
+            if (!area || area.dataset.dragBound === 'true') {
+                return;
+            }
+
+            area.dataset.dragBound = 'true';
             let isDragging = false;
             let startX = 0;
             let startScrollLeft = 0;
@@ -1170,7 +1339,7 @@
 
                 const delta = event.clientX - startX;
                 area.scrollLeft = startScrollLeft - delta;
-                syncPlannerScroll(area);
+                onSync(area);
             });
 
             function stopDragging(event) {
@@ -1188,13 +1357,23 @@
             area.addEventListener('pointerup', stopDragging);
             area.addEventListener('pointercancel', stopDragging);
             area.addEventListener('scroll', function () {
-                syncPlannerScroll(area);
+                onSync(area);
+            });
+        }
+
+        function setupAddPlannerInteractions(initialScrollLeft) {
+            const areas = getAddPlannerScrollAreas();
+            attachPlannerDrag(addPlannerHeader, syncAddPlannerScroll);
+
+            const scrollLeft = Math.max(0, initialScrollLeft || 0);
+            areas.forEach(function (area) {
+                area.scrollLeft = scrollLeft;
             });
         }
 
         function setupPlannerInteractions(initialScrollLeft) {
             const areas = getPlannerScrollAreas();
-            attachPlannerDrag(editPlannerHeader);
+            attachPlannerDrag(editPlannerHeader, syncPlannerScroll);
 
             const scrollLeft = Math.max(0, initialScrollLeft || 0);
             areas.forEach(function (area) {
@@ -1210,27 +1389,27 @@
             slider.style.setProperty('--slider-progress', `${progress}%`);
         }
 
-        function syncSliderFromDate(dateInput, slider) {
+        function syncSliderFromDate(dateInput, slider, plannerState) {
             const parsed = parseLocalDate(dateInput.value);
-            if (!parsed || !editPlannerState) {
+            if (!parsed || !plannerState) {
                 return;
             }
 
             const offset = Math.min(
-                editPlannerState.totalDays,
-                Math.max(0, daysBetween(editPlannerState.startDate, parsed))
+                plannerState.totalDays,
+                Math.max(0, daysBetween(plannerState.startDate, parsed))
             );
 
             slider.value = String(offset);
             updateSliderProgress(slider);
         }
 
-        function syncDateFromSlider(slider, dateInput) {
-            if (!editPlannerState) {
+        function syncDateFromSlider(slider, dateInput, plannerState) {
+            if (!plannerState) {
                 return;
             }
 
-            const selectedDate = addDays(editPlannerState.startDate, Number(slider.value));
+            const selectedDate = addDays(plannerState.startDate, Number(slider.value));
             dateInput.value = formatInputDate(selectedDate);
             updateSliderProgress(slider);
         }
@@ -1243,7 +1422,7 @@
 
             editingShipmentIndex = index;
             editPlannerState = buildPlannerState(shipment.timeline);
-            renderPlannerHeader(editPlannerState);
+            renderPlannerHeader(editPlannerState, editPlannerHeader);
             editStageContainer.innerHTML = '';
             let initialScrollLeft = 0;
 
@@ -1261,7 +1440,7 @@
                     <div class="edit-stage-name">${stage.name}</div>
                     <div class="edit-stage-planner">
                         <div class="edit-stage-scroll" style="width: ${editPlannerState.timelineWidth + 32}px;">
-                            <div class="edit-stage-grid">${createPlannerGridMarkup(editPlannerState.months)}</div>
+                            <div class="edit-stage-grid">${createPlannerGridMarkup(editPlannerState.months, 'edit-stage-grid-cell')}</div>
                             <input type="range" class="edit-stage-slider" data-stage-index="${stageIndex}" min="0" max="${editPlannerState.totalDays}" value="${initialOffset}" style="width: ${editPlannerState.timelineWidth}px; margin-left: 0;">
                         </div>
                     </div>
@@ -1272,14 +1451,14 @@
                 const dateInput = row.querySelector('.edit-stage-date');
 
                 slider.addEventListener('input', function () {
-                    syncDateFromSlider(slider, dateInput);
+                    syncDateFromSlider(slider, dateInput, editPlannerState);
                 });
 
                 dateInput.addEventListener('input', function () {
-                    syncSliderFromDate(dateInput, slider);
+                    syncSliderFromDate(dateInput, slider, editPlannerState);
                 });
 
-                syncSliderFromDate(dateInput, slider);
+                syncSliderFromDate(dateInput, slider, editPlannerState);
                 editStageContainer.appendChild(row);
 
                 if (stageIndex === 0) {
