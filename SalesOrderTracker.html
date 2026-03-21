@@ -1046,6 +1046,9 @@
                         dateInput.disabled = !applicable;
                         dateInput.required = applicable;
                         plannerCell.classList.toggle('is-hidden', !applicable);
+                        if (!applicable) {
+                            dateInput.value = '';
+                        }
                         pill.textContent = applicable ? 'Applicable' : 'Not Applicable';
                     });
                 }
