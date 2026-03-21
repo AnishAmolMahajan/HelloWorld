@@ -47,6 +47,7 @@
             animation: waveFlow 8s ease-in-out infinite;
         }
         header {
+            position: relative;
             background-color: rgba(0, 0, 0, 0.2);
             padding: 20px;
             text-align: center;
@@ -56,6 +57,60 @@
             color: white;
             font-size: 1.5em;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .header-buttons {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .header-buttons button {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            color: #111111;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .header-buttons button:hover {
+            background-color: #f1f1f1;
+            transform: translateY(-1px);
+        }
+        .color-picker {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            display: none;
+            grid-template-columns: repeat(4, 34px);
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+        }
+        .color-picker.show {
+            display: grid;
+        }
+        .color-option {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .color-option:hover {
+            transform: scale(1.08);
         }
         main {
             flex: 1;
@@ -193,6 +248,24 @@
 <body>
     <header>
         <h1>My Website</h1>
+        <div class="header-buttons">
+            <button id="rainbowButton" type="button">Rainbow</button>
+            <button id="colorsButton" type="button">Colors</button>
+            <div id="colorPicker" class="color-picker" aria-label="Background color options">
+                <button type="button" class="color-option" data-color="#ff0000" title="Red" style="background:#ff0000"></button>
+                <button type="button" class="color-option" data-color="#ff7f00" title="Orange" style="background:#ff7f00"></button>
+                <button type="button" class="color-option" data-color="#ffff00" title="Yellow" style="background:#ffff00"></button>
+                <button type="button" class="color-option" data-color="#00ff00" title="Green" style="background:#00ff00"></button>
+                <button type="button" class="color-option" data-color="#0000ff" title="Blue" style="background:#0000ff"></button>
+                <button type="button" class="color-option" data-color="#4b0082" title="Indigo" style="background:#4b0082"></button>
+                <button type="button" class="color-option" data-color="#9400d3" title="Violet" style="background:#9400d3"></button>
+                <button type="button" class="color-option" data-color="#0f172a" title="Midnight" style="background:#0f172a"></button>
+                <button type="button" class="color-option" data-color="#1e293b" title="Slate" style="background:#1e293b"></button>
+                <button type="button" class="color-option" data-color="#14532d" title="Forest" style="background:#14532d"></button>
+                <button type="button" class="color-option" data-color="#7f1d1d" title="Ruby" style="background:#7f1d1d"></button>
+                <button type="button" class="color-option" data-color="#1e3a8a" title="Royal Blue" style="background:#1e3a8a"></button>
+            </div>
+        </div>
     </header>
     <main>
         <h1>CSS Tricks</h1>
@@ -285,6 +358,50 @@
         <p>&copy; 2026 Hello World. All rights reserved.</p>
         <p>Author: 😊 Anish Mahajan 😊</p>
     </footer>
+    <script>
+        const body = document.body;
+        const colorsButton = document.getElementById('colorsButton');
+        const rainbowButton = document.getElementById('rainbowButton');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const originalRainbow = 'linear-gradient(135deg, #FF0000 0%, #FF7F00 8%, #FFFF00 16%, #00FF00 24%, #0000FF 32%, #4B0082 40%, #9400D3 48%, #FF0000 56%, #FF7F00 64%, #FFFF00 72%, #00FF00 80%, #0000FF 88%, #4B0082 96%, #9400D3 100%)';
+
+        function setSolidBackground(color) {
+            body.style.animation = 'none';
+            body.style.backgroundImage = 'none';
+            body.style.backgroundColor = color;
+        }
+
+        function setRainbowBackground() {
+            body.style.background = originalRainbow;
+            body.style.backgroundSize = '200% 200%';
+            body.style.backgroundPosition = '0% 0%';
+            body.style.animation = 'waveFlow 8s ease-in-out infinite';
+        }
+
+        colorsButton.addEventListener('click', function () {
+            colorPicker.classList.toggle('show');
+        });
+
+        rainbowButton.addEventListener('click', function () {
+            colorPicker.classList.remove('show');
+            setRainbowBackground();
+        });
+
+        colorOptions.forEach(function (option) {
+            option.addEventListener('click', function () {
+                const selectedColor = option.getAttribute('data-color');
+                setSolidBackground(selectedColor);
+                colorPicker.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!colorPicker.contains(event.target) && event.target !== colorsButton) {
+                colorPicker.classList.remove('show');
+            }
+        });
+    </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
