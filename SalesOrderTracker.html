@@ -996,6 +996,9 @@
             });
             addPlannerState = buildPlannerState(plannerSourceStages);
             renderPlannerHeader(addPlannerState, addPlannerHeader);
+            const addTimelineWidth = addPlannerState.timelineWidth;
+            const addScrollWidth = addTimelineWidth + 32;
+            const addGridMarkup = createPlannerGridMarkup(addPlannerState.months, 'stage-config-grid-cell');
             let initialScrollLeft = 0;
 
             stages.forEach(function (stage, stageIndex) {
@@ -1014,9 +1017,9 @@
                 row.innerHTML = `
                     <div class="stage-config-name">${stage.name}</div>
                     <div class="stage-config-planner">
-                        <div class="stage-config-scroll" style="width: ${addPlannerState.timelineWidth + 32}px;">
-                            <div class="stage-config-grid">${createPlannerGridMarkup(addPlannerState.months, 'stage-config-grid-cell')}</div>
-                            <input type="range" class="stage-config-slider" data-stage-name="${stage.name}" min="0" max="${addPlannerState.totalDays}" value="${initialOffset}" style="width: ${addPlannerState.timelineWidth}px; margin-left: 0;">
+                        <div class="stage-config-scroll" style="width: ${addScrollWidth}px;">
+                            <div class="stage-config-grid">${addGridMarkup}</div>
+                            <input type="range" class="stage-config-slider" data-stage-name="${stage.name}" min="0" max="${addPlannerState.totalDays}" value="${initialOffset}" style="width: ${addTimelineWidth}px; margin-left: 0;">
                         </div>
                     </div>
                     <div class="stage-config-date-cell">
@@ -1044,7 +1047,6 @@
                 if (!isMandatory) {
                     const checkbox = row.querySelector('.stage-applicable-checkbox');
                     const pill = row.querySelector('.stage-pill');
-                    const plannerCell = row.querySelector('.stage-config-planner');
 
                     checkbox.addEventListener('change', function () {
                         const applicable = checkbox.checked;
