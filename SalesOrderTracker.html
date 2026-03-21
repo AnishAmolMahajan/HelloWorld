@@ -59,6 +59,27 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
             line-height: 1.6;
         }
+        .shipment-types {
+            margin-top: 28px;
+            color: white;
+        }
+        .shipment-types h3 {
+            font-size: 1.3em;
+            margin-bottom: 16px;
+            color: #FFD700;
+        }
+        .shipment-type {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid #FFD700;
+            border-radius: 6px;
+        }
+        .shipment-type strong {
+            color: #FFD700;
+            display: block;
+            margin-bottom: 6px;
+        }
         .back-link {
             margin-top: 30px;
         }
@@ -169,7 +190,27 @@
     <main>
         <h1>Sales Order Tracker</h1>
         <section class="content-card">
-            <p class="points-paragraph">Sales Order Tracking is a critical component of supply chain management that enables businesses to monitor the status and progress of customer orders from placement through delivery. Effective tracking systems provide real-time visibility into order fulfillment, inventory allocation, and logistics operations, allowing teams to identify bottlenecks and respond quickly to delays. Modern order trackers integrate data from multiple systems including inventory management, warehouse operations, and shipping logistics to create a unified view of each order's journey. Understanding the key metrics such as order-to-delivery time, fulfillment accuracy, and status transparency helps organizations optimize their operations, improve customer satisfaction, and reduce operational costs.</p>
+            <p class="points-paragraph">Sales Order Tracking is a critical component of supply chain management that enables businesses to monitor the status and progress of customer orders from placement through delivery. Each sales order can contain multiple shipments to clients, with each shipment having a specific type that categorizes its purpose and handling requirements. Effective tracking systems provide real-time visibility into order fulfillment, inventory allocation, and logistics operations, allowing teams to identify bottlenecks and respond quickly to delays. Modern order trackers integrate data from multiple systems including inventory management, warehouse operations, and shipping logistics to create a unified view of each order's journey and its associated shipments.</p>
+
+            <div class="shipment-types">
+                <h3>Shipment Types</h3>
+                <div class="shipment-type">
+                    <strong>Stock Shipment</strong>
+                    <p>Standard shipment of finished goods directly from inventory to the client for order fulfillment.</p>
+                </div>
+                <div class="shipment-type">
+                    <strong>Stock Machining Shipment</strong>
+                    <p>Shipment involving goods that require preprocessing, customization, or light machining operations before reaching the client.</p>
+                </div>
+                <div class="shipment-type">
+                    <strong>Stock Incoming Shipment</strong>
+                    <p>Shipment of raw materials or components received from suppliers that need to be processed or assembled into finished goods.</p>
+                </div>
+                <div class="shipment-type">
+                    <strong>Supplier Shipment</strong>
+                    <p>Direct shipment from the supplier to the client, often used for items not held in stock or for drop-shipping arrangements.</p>
+                </div>
+            </div>
         </section>
         <div class="back-link">
             <a href="index.html">← Back to Home</a>
