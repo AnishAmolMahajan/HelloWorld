@@ -1341,25 +1341,9 @@
                 <div class="execution-controls-header">
                     <div>
                         <h3 id="executionControlsTitle">Checkpoint Definition Library</h3>
-                        <p>Define checkpoints once, map them to tracker stages, and they will be auto-applied to every shipment that includes those stages.</p>
                     </div>
                     <div class="execution-context-badge" id="executionContextBadge">Global Stage Mapping</div>
                 </div>
-                <div class="execution-controls-grid">
-                    <div class="execution-control-stat">
-                        <span class="execution-control-stat-label">Definition Mode</span>
-                        <strong class="execution-control-stat-value">Popup</strong>
-                    </div>
-                    <div class="execution-control-stat">
-                        <span class="execution-control-stat-label">Checkpoints Defined</span>
-                        <strong class="execution-control-stat-value" id="executionControlsCount">0</strong>
-                    </div>
-                    <div class="execution-control-stat">
-                        <span class="execution-control-stat-label">Stages Covered</span>
-                        <strong class="execution-control-stat-value" id="executionMilestoneCount">0</strong>
-                    </div>
-                </div>
-                <p class="execution-controls-summary" id="executionControlsSummary">Create a reusable checkpoint library and map each checkpoint to one or more stages.</p>
                 <div class="execution-controls-list">
                     <div class="execution-controls-list-header">
                         <h4>Checkpoint Definitions</h4>
@@ -1609,9 +1593,6 @@
         const executionControlModalClose = document.getElementById('executionControlModalClose');
         const executionShipmentSelect = document.getElementById('executionShipmentSelect');
         const executionContextBadge = document.getElementById('executionContextBadge');
-        const executionControlsCount = document.getElementById('executionControlsCount');
-        const executionMilestoneCount = document.getElementById('executionMilestoneCount');
-        const executionControlsSummary = document.getElementById('executionControlsSummary');
         const executionControlForm = document.getElementById('executionControlForm');
         const executionControlType = document.getElementById('executionControlType');
         const executionControlCategory = document.getElementById('executionControlCategory');
@@ -2268,20 +2249,8 @@
             }
             executionShipmentSelect.value = selectedExecutionShipmentType;
 
-            const coveredStages = new Set();
-            checkpointDefinitions.forEach(function (control) {
-                (control.verificationStages || []).forEach(function (stageName) {
-                    coveredStages.add(stageName);
-                });
-            });
-
             executionContextBadge.textContent = 'Global Stage Mapping';
             executionContextBadge.className = 'execution-context-badge';
-            executionControlsCount.textContent = String(checkpointDefinitions.length);
-            executionMilestoneCount.textContent = String(coveredStages.size);
-            executionControlsSummary.textContent = checkpointDefinitions.length
-                ? `${checkpointDefinitions.length} checkpoint definition${checkpointDefinitions.length === 1 ? '' : 's'} configured. They auto-apply to shipment stages based on mapping.`
-                : 'No checkpoint definitions added yet. Create checkpoints and map them to stages to enable automatic shipment application.';
             executionControlsListMeta.textContent = `${checkpointDefinitions.length} checkpoint${checkpointDefinitions.length === 1 ? '' : 's'}`;
 
             if (editingExecutionControlIndex !== null && !checkpointDefinitions[editingExecutionControlIndex]) {
