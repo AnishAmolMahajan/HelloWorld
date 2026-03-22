@@ -2520,7 +2520,7 @@
                     return `<span class="execution-control-pill">${stageName}</span>`;
                 }).join('');
                 return `
-                    <div class="checkpoint-list-item" onclick="openExecutionControlModal(${item.index})">
+                    <div class="checkpoint-list-item">
                         <div class="checkpoint-list-item-title">${control.type} | ${control.category || 'Uncategorized'}</div>
                         <div class="checkpoint-list-item-content">${control.checklistDetails || 'No details provided'}</div>
                         <div class="checkpoint-list-item-stages">
