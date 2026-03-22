@@ -1352,34 +1352,9 @@
                     </div>
                 </div>
                 <p class="execution-controls-summary" id="executionControlsSummary">Create a reusable checkpoint library and map each checkpoint to one or more stages.</p>
-                <form class="execution-control-form" id="executionControlForm">
-                    <div class="execution-control-form-grid">
-                        <div class="execution-control-field">
-                            <label for="executionControlType">Type of Execution Control</label>
-                            <select id="executionControlType" required>
-                                <option value="">Select control type...</option>
-                                <option value="Commercial">Commercial</option>
-                                <option value="Technical">Technical</option>
-                                <option value="Shipping">Shipping</option>
-                            </select>
-                        </div>
-                        <div class="execution-control-field execution-control-field-wide">
-                            <label for="executionChecklistDetails">Control Checklist Details</label>
-                            <textarea id="executionChecklistDetails" placeholder="Enter the checklist items or verification notes required for this control..." required></textarea>
-                        </div>
-                    </div>
-                    <div class="execution-control-stage-panel">
-                        <div class="execution-control-stage-header">
-                            <h4>Applicable Stages</h4>
-                            <span id="executionStageHint">Select the stages where this checkpoint should apply.</span>
-                        </div>
-                        <div class="execution-control-stage-list" id="executionVerificationStageList"></div>
-                    </div>
-                    <div class="execution-action-row">
-                        <button type="submit" class="execution-action-btn start" id="executionControlSubmitBtn">Add Control</button>
-                        <button type="button" class="execution-action-btn reset" id="executionControlFormResetBtn">Clear</button>
-                    </div>
-                </form>
+                <div class="execution-action-row">
+                    <button type="button" class="execution-action-btn start" id="openExecutionControlModalBtn">Add Checkpoint</button>
+                </div>
                 <div class="execution-controls-list">
                     <div class="execution-controls-list-header">
                         <h4>Checkpoint Definitions</h4>
@@ -1462,6 +1437,46 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="executionControlModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="executionControlModalTitle">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="executionControlModalTitle">Add Checkpoint Definition</div>
+                    <div class="modal-subtitle" id="executionControlModalSubtitle">Define the checkpoint once and map it to the applicable stages.</div>
+                </div>
+                <button type="button" class="modal-close" id="executionControlModalClose" aria-label="Close">&times;</button>
+            </div>
+            <form class="execution-control-form" id="executionControlForm">
+                <div class="execution-control-form-grid">
+                    <div class="execution-control-field">
+                        <label for="executionControlType">Type of Execution Control</label>
+                        <select id="executionControlType" required>
+                            <option value="">Select control type...</option>
+                            <option value="Commercial">Commercial</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Shipping">Shipping</option>
+                        </select>
+                    </div>
+                    <div class="execution-control-field execution-control-field-wide">
+                        <label for="executionChecklistDetails">Control Checklist Details</label>
+                        <textarea id="executionChecklistDetails" placeholder="Enter the checklist items or verification notes required for this control..." required></textarea>
+                    </div>
+                </div>
+                <div class="execution-control-stage-panel">
+                    <div class="execution-control-stage-header">
+                        <h4>Applicable Stages</h4>
+                        <span id="executionStageHint">Select the stages where this checkpoint should apply.</span>
+                    </div>
+                    <div class="execution-control-stage-list" id="executionVerificationStageList"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-cancel" id="executionControlFormResetBtn">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-save" id="executionControlSubmitBtn">Add Checkpoint</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const shipmentTimelines = {
             'Stock Shipment': [
@@ -1521,6 +1536,11 @@
         const addPlannerHeader = document.getElementById('addPlannerHeader');
         const optionalStageModal = document.getElementById('optionalStageModal');
         const optionalStageModalClose = document.getElementById('optionalStageModalClose');
+        const openExecutionControlModalBtn = document.getElementById('openExecutionControlModalBtn');
+        const executionControlModal = document.getElementById('executionControlModal');
+        const executionControlModalTitle = document.getElementById('executionControlModalTitle');
+        const executionControlModalSubtitle = document.getElementById('executionControlModalSubtitle');
+        const executionControlModalClose = document.getElementById('executionControlModalClose');
         const executionShipmentSelect = document.getElementById('executionShipmentSelect');
         const executionContextBadge = document.getElementById('executionContextBadge');
         const executionControlsCount = document.getElementById('executionControlsCount');
@@ -1549,11 +1569,20 @@
         stageToggleTrigger.addEventListener('click', openOptionalStageModal);
         addShipmentModalClose.addEventListener('click', closeAddShipmentModal);
         addShipmentCancelBtn.addEventListener('click', closeAddShipmentModal);
+        openExecutionControlModalBtn.addEventListener('click', function () {
+            openExecutionControlModal();
+        });
+        executionControlModalClose.addEventListener('click', closeExecutionControlModal);
 
         optionalStageModalClose.addEventListener('click', closeOptionalStageModal);
         addShipmentModal.addEventListener('click', function (event) {
             if (event.target === addShipmentModal) {
                 closeAddShipmentModal();
+            }
+        });
+        executionControlModal.addEventListener('click', function (event) {
+            if (event.target === executionControlModal) {
+                closeExecutionControlModal();
             }
         });
         optionalStageModal.addEventListener('click', function (event) {
@@ -1611,10 +1640,10 @@
 
             editingExecutionControlIndex = null;
             displayShipments();
+            closeExecutionControlModal();
         });
         executionControlFormResetBtn.addEventListener('click', function () {
-            editingExecutionControlIndex = null;
-            renderExecutionControls();
+            closeExecutionControlModal();
         });
 
         shipmentForm.addEventListener('submit', function(e) {
@@ -1727,6 +1756,42 @@
         function closeOptionalStageModal() {
             optionalStageModal.classList.remove('open');
             optionalStageModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function setExecutionControlModalMode() {
+            if (editingExecutionControlIndex === null) {
+                executionControlModalTitle.textContent = 'Add Checkpoint Definition';
+                executionControlModalSubtitle.textContent = 'Define the checkpoint once and map it to the applicable stages.';
+                executionControlSubmitBtn.textContent = 'Add Checkpoint';
+                executionControlFormResetBtn.textContent = 'Cancel';
+                return;
+            }
+
+            executionControlModalTitle.textContent = 'Edit Checkpoint Definition';
+            executionControlModalSubtitle.textContent = 'Update checkpoint details and stage mappings in this popup.';
+            executionControlSubmitBtn.textContent = 'Save Changes';
+            executionControlFormResetBtn.textContent = 'Cancel';
+        }
+
+        function openExecutionControlModal(index) {
+            if (typeof index === 'number' && checkpointDefinitions[index]) {
+                editingExecutionControlIndex = index;
+            } else if (typeof index !== 'number') {
+                editingExecutionControlIndex = null;
+            }
+
+            updateExecutionControlFormState();
+            setExecutionControlModalMode();
+            executionControlModal.classList.add('open');
+            executionControlModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeExecutionControlModal() {
+            executionControlModal.classList.remove('open');
+            executionControlModal.setAttribute('aria-hidden', 'true');
+            editingExecutionControlIndex = null;
+            updateExecutionControlFormState();
+            setExecutionControlModalMode();
         }
 
         function updateStageToggleTriggerLabel() {
@@ -2090,8 +2155,6 @@
 
             executionControlType.value = editingControl ? editingControl.type : '';
             executionChecklistDetails.value = editingControl ? editingControl.checklistDetails : '';
-            executionControlSubmitBtn.textContent = editingControl ? 'Save Checkpoint' : 'Add Checkpoint';
-            executionControlFormResetBtn.textContent = editingControl ? 'Cancel Edit' : 'Clear';
             renderVerificationStageChoices(editingControl ? editingControl.verificationStages : []);
         }
 
@@ -2292,8 +2355,7 @@
                 return;
             }
 
-            editingExecutionControlIndex = index;
-            renderExecutionControls();
+            openExecutionControlModal(index);
         }
 
         function removeExecutionControl(index) {
