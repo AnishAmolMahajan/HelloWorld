@@ -238,23 +238,6 @@
             background: linear-gradient(135deg, #f7fbff 0%, #edf5ff 100%);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
-        .execution-controls-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-        .execution-controls-header h3 {
-            color: #1d4ed8;
-            font-size: 1.28em;
-            margin-bottom: 6px;
-        }
-        .execution-controls-header p {
-            color: #475569;
-            line-height: 1.6;
-            max-width: 760px;
-        }
         .execution-context-badge {
             display: inline-flex;
             align-items: center;
@@ -1337,13 +1320,7 @@
                 <button type="button" class="add-shipment-btn" id="openExecutionControlModalBtn">Checkpoint Definition Library</button>
             </div>
 
-            <section class="execution-controls-section" aria-labelledby="executionControlsTitle">
-                <div class="execution-controls-header">
-                    <div>
-                        <h3 id="executionControlsTitle">Checkpoint Definition Library</h3>
-                    </div>
-                    <div class="execution-context-badge" id="executionContextBadge">Global Stage Mapping</div>
-                </div>
+            <section class="execution-controls-section" aria-label="Checkpoint Definition Library">
                 <div class="execution-controls-list">
                     <div class="execution-controls-list-header">
                         <h4>Checkpoint Definitions</h4>
@@ -1592,7 +1569,6 @@
         const executionControlModalSubtitle = document.getElementById('executionControlModalSubtitle');
         const executionControlModalClose = document.getElementById('executionControlModalClose');
         const executionShipmentSelect = document.getElementById('executionShipmentSelect');
-        const executionContextBadge = document.getElementById('executionContextBadge');
         const executionControlForm = document.getElementById('executionControlForm');
         const executionControlType = document.getElementById('executionControlType');
         const executionControlCategory = document.getElementById('executionControlCategory');
@@ -2249,8 +2225,6 @@
             }
             executionShipmentSelect.value = selectedExecutionShipmentType;
 
-            executionContextBadge.textContent = 'Global Stage Mapping';
-            executionContextBadge.className = 'execution-context-badge';
             executionControlsListMeta.textContent = `${checkpointDefinitions.length} checkpoint${checkpointDefinitions.length === 1 ? '' : 's'}`;
 
             if (editingExecutionControlIndex !== null && !checkpointDefinitions[editingExecutionControlIndex]) {
