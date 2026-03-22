@@ -1570,11 +1570,23 @@
                 const plannedSpanDays = firstDate && lastDate
                     ? Math.max(1, daysBetween(firstDate, lastDate) + 1)
                     : 0;
-                const firstStageName = shipment.timeline.length
-                    ? shipment.timeline[0].name
+                const firstStage = shipment.timeline.length
+                    ? shipment.timeline[0]
+                    : null;
+                const lastStage = shipment.timeline.length
+                    ? shipment.timeline[shipment.timeline.length - 1]
+                    : null;
+                const firstStageDate = firstStage && firstStage.date
+                    ? parseLocalDate(firstStage.date)
+                    : null;
+                const lastStageDate = lastStage && lastStage.date
+                    ? parseLocalDate(lastStage.date)
+                    : null;
+                const firstStageName = firstStage
+                    ? `${firstStage.name}${firstStageDate ? ` (${formatDisplayDate(firstStageDate)})` : ''}`
                     : '-';
-                const lastStageName = shipment.timeline.length
-                    ? shipment.timeline[shipment.timeline.length - 1].name
+                const lastStageName = lastStage
+                    ? `${lastStage.name}${lastStageDate ? ` (${formatDisplayDate(lastStageDate)})` : ''}`
                     : '-';
                 const plannedStageCount = parsedDates.length;
                 const totalStageCount = shipment.timeline.length;
@@ -1707,7 +1719,31 @@
             const weeks = Math.floor(remainingAfterMonths / 7);
             const days = remainingAfterMonths % 7;
 
-            return `${months} Months ${weeks} Weeks ${days} Days`;
+            function formatSpanPart(value, singularLabel) {
+                return `${value} ${singularLabel}${value === 1 ? '' : 's'}`;
+            }
+
+            if (totalDays < 7) {
+                return formatSpanPart(totalDays, 'Day');
+            }
+
+            if (totalDays < 30) {
+                const parts = [formatSpanPart(weeks, 'Week')];
+                if (days > 0) {
+                    parts.push(formatSpanPart(days, 'Day'));
+                }
+                return parts.join(' ');
+            }
+
+            const parts = [formatSpanPart(months, 'Month')];
+            if (weeks > 0) {
+                parts.push(formatSpanPart(weeks, 'Week'));
+            }
+            if (days > 0) {
+                parts.push(formatSpanPart(days, 'Day'));
+            }
+
+            return parts.join(' ');
         }
 
         function addDays(date, days) {
