@@ -5,64 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tower Quiz Game</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        * {
             margin: 0;
-            height: 100vh;
-            background: #f0f0f0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes waveFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg,
+                #FF0000 0%,
+                #FF7F00 8%,
+                #FFFF00 16%,
+                #00FF00 24%,
+                #0000FF 32%,
+                #4B0082 40%,
+                #9400D3 48%,
+                #FF0000 56%,
+                #FF7F00 64%,
+                #FFFF00 72%,
+                #00FF00 80%,
+                #0000FF 88%,
+                #4B0082 96%,
+                #9400D3 100%);
+            background-size: 200% 200%;
+            animation: waveFlow 8s ease-in-out infinite;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        header {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 2px solid #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-nav {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-nav a {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            color: #111111;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.92em;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .header-nav a:hover {
+            background-color: #f1f1f1;
+            transform: translateY(-1px);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .game-shell {
+            width: min(1000px, 100%);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel h2 {
+            font-size: 1.4em;
+            margin-bottom: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .tower {
-            width: 40%;
             text-align: center;
-            position: relative;
+        }
+
+        #towerBlocks {
+            min-height: 320px;
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 10px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .block {
-            width: 100px;
+            width: 110px;
             height: 30px;
             margin: 5px auto;
-            background: #007BFF;
-            border: 2px solid #0056b3;
-        }
-
-        .questions {
-            width: 50%;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            background: linear-gradient(145deg, #38bdf8, #2563eb);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
         }
 
         .question {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+            font-size: 1.4em;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .answers {
+            display: grid;
+            gap: 10px;
         }
 
         .answers button {
             display: block;
-            margin: 10px 0;
-            padding: 10px;
+            width: 100%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            color: #111111;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Poppins', sans-serif;
             font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            border: none;
-            background: #61b261;
-            color: white;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .answers button:hover {
-            background: #4e944e;
+            background-color: #f1f1f1;
+            transform: translateY(-1px);
+        }
+
+        .hint {
+            margin-top: 14px;
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 2px solid #ffffff;
+            text-align: center;
+            padding: 18px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 860px) {
+            .game-shell {
+                grid-template-columns: 1fr;
+            }
+
+            #towerBlocks {
+                min-height: 220px;
+            }
+
+            .question {
+                font-size: 1.2em;
+            }
+
+            header {
+                padding-top: 74px;
+            }
+
+            .header-nav {
+                left: 50%;
+                top: 18px;
+                transform: translateX(-50%);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="tower">
-        <div id="towerBlocks"></div>
-    </div>
-    <div class="questions">
-        <div id="question" class="question">Question will appear here</div>
-        <div id="answers" class="answers"></div>
-    </div>
+    <header>
+        <div class="header-nav" aria-label="Page navigation">
+            <a href="index.html">Home</a>
+            <a href="#" id="backButton">Back</a>
+        </div>
+        <h1>Tower Quiz Game</h1>
+    </header>
+
+    <main>
+        <section class="game-shell" aria-label="Tower quiz game area">
+            <div class="panel tower">
+                <h2>Your Tower</h2>
+                <div id="towerBlocks"></div>
+                <p class="hint">Each correct answer adds a block. Wrong answers remove two blocks.</p>
+            </div>
+            <div class="panel questions">
+                <h2>Question</h2>
+                <div id="question" class="question">Question will appear here</div>
+                <div id="answers" class="answers"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Hello Everyone. All rights reserved.</p>
+        <p>Author: 😊 Anish Mahajan 😊</p>
+    </footer>
 
     <audio id="risingSound" src="rising.mp3"></audio>
     <audio id="crashSound" src="crash.mp3"></audio>
@@ -79,6 +260,7 @@
         const answersDiv = document.getElementById('answers');
         const risingSound = document.getElementById('risingSound');
         const crashSound = document.getElementById('crashSound');
+        const backButton = document.getElementById('backButton');
 
         let currentQuestionIndex = 0;
 
@@ -116,10 +298,9 @@
         }
 
         function removeBlocks() {
-            const blocks = towerBlocks.querySelectorAll('.block');
             for (let i = 0; i < 2; i++) {
-                if (blocks.length > 0) {
-                    towerBlocks.removeChild(blocks[blocks.length - 1]);
+                if (towerBlocks.children.length > 0) {
+                    towerBlocks.removeChild(towerBlocks.lastElementChild);
                 }
             }
         }
@@ -134,6 +315,15 @@
             crashSound.currentTime = 0;
             crashSound.play();
         }
+
+        backButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
 
         loadQuestion();
     </script>
