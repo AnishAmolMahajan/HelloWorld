@@ -192,7 +192,8 @@
             font-weight: 600;
         }
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 10px 12px;
             background-color: #ffffff;
@@ -234,8 +235,8 @@
             padding: 22px;
             border-radius: 16px;
             border: 1px solid #cfe0ff;
-            background: linear-gradient(135deg, #f4f8ff 0%, #eef5ff 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+            background: linear-gradient(135deg, #f7fbff 0%, #edf5ff 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
         .execution-controls-header {
             display: flex;
@@ -254,11 +255,11 @@
             line-height: 1.6;
             max-width: 760px;
         }
-        .execution-status-badge {
+        .execution-context-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 150px;
+            min-width: 180px;
             padding: 10px 14px;
             border-radius: 999px;
             border: 1px solid #bfdbfe;
@@ -268,29 +269,14 @@
             font-weight: 700;
             text-align: center;
         }
-        .execution-status-badge.is-planned {
+        .execution-context-badge.is-empty {
             background-color: #e2e8f0;
             border-color: #cbd5e1;
             color: #334155;
         }
-        .execution-status-badge.is-in-progress {
-            background-color: #dbeafe;
-            border-color: #93c5fd;
-            color: #1d4ed8;
-        }
-        .execution-status-badge.is-on-hold {
-            background-color: #fef3c7;
-            border-color: #fcd34d;
-            color: #92400e;
-        }
-        .execution-status-badge.is-completed {
-            background-color: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
-        }
         .execution-controls-grid {
             display: grid;
-            grid-template-columns: minmax(220px, 1.2fr) minmax(160px, 0.8fr);
+            grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(140px, 0.8fr));
             gap: 16px;
             margin-top: 18px;
         }
@@ -298,6 +284,9 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+        .execution-control-field-wide {
+            grid-column: 1 / -1;
         }
         .execution-control-field label {
             color: #334155;
@@ -307,7 +296,8 @@
             letter-spacing: 0.04em;
         }
         .execution-control-field select,
-        .execution-control-field input {
+        .execution-control-field input,
+        .execution-control-field textarea {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #cbd5e1;
@@ -316,6 +306,104 @@
             color: #0f172a;
             font-family: 'Poppins', sans-serif;
             font-size: 0.96em;
+        }
+        .execution-control-field textarea {
+            resize: vertical;
+            min-height: 104px;
+        }
+        .execution-control-stat {
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid #d6e5ff;
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+        .execution-control-stat-label {
+            color: #64748b;
+            font-size: 0.76em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .execution-control-stat-value {
+            display: block;
+            margin-top: 8px;
+            color: #1e3a8a;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        .execution-controls-summary {
+            margin-top: 14px;
+            color: #475569;
+            line-height: 1.6;
+        }
+        .execution-control-form {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #d8e5fb;
+            background-color: rgba(255, 255, 255, 0.92);
+        }
+        .execution-control-form-grid {
+            display: grid;
+            grid-template-columns: minmax(220px, 0.9fr) minmax(320px, 1.1fr);
+            gap: 16px;
+        }
+        .execution-control-stage-panel {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #dbe3f0;
+            background-color: #f8fbff;
+        }
+        .execution-control-stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .execution-control-stage-header h4 {
+            color: #1d4ed8;
+            font-size: 1em;
+        }
+        .execution-control-stage-header span {
+            color: #64748b;
+            font-size: 0.86em;
+        }
+        .execution-control-stage-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stage-choice {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            cursor: pointer;
+            min-width: 220px;
+            flex: 1 1 220px;
+        }
+        .stage-choice input {
+            margin-top: 2px;
+        }
+        .stage-choice-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .stage-choice-name {
+            color: #1e3a8a;
+            font-size: 0.92em;
+            font-weight: 600;
+        }
+        .stage-choice-date {
+            color: #64748b;
+            font-size: 0.8em;
         }
         .execution-action-row {
             display: flex;
@@ -347,21 +435,98 @@
             background-color: #1d4ed8;
             color: #ffffff;
         }
-        .execution-action-btn.hold {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        .execution-action-btn.resume {
-            background-color: #dbeafe;
-            color: #1d4ed8;
-        }
-        .execution-action-btn.complete {
-            background-color: #dcfce7;
-            color: #166534;
-        }
         .execution-action-btn.reset {
             background-color: #e2e8f0;
             color: #334155;
+        }
+        .execution-controls-list {
+            margin-top: 22px;
+        }
+        .execution-controls-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .execution-controls-list-header h4 {
+            color: #1d4ed8;
+            font-size: 1.08em;
+        }
+        .execution-controls-list-header span {
+            color: #64748b;
+            font-size: 0.88em;
+            font-weight: 600;
+        }
+        .execution-controls-cards {
+            display: grid;
+            gap: 14px;
+        }
+        .execution-control-card {
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #dbe3f0;
+            background-color: #ffffff;
+            box-shadow: 0 10px 24px rgba(30, 58, 138, 0.08);
+        }
+        .execution-control-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .execution-control-card-title {
+            color: #1e3a8a;
+            font-size: 1.02em;
+            font-weight: 700;
+        }
+        .execution-control-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .execution-control-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background-color: #e8f0ff;
+            border: 1px solid #c4d7ff;
+            color: #1e3a8a;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+        .execution-control-details {
+            margin-top: 14px;
+            color: #334155;
+            line-height: 1.7;
+        }
+        .execution-control-verification {
+            margin-top: 14px;
+        }
+        .execution-control-verification-label {
+            color: #64748b;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .execution-control-verification-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .empty-state {
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            background-color: #f8fafc;
+            color: #64748b;
+            line-height: 1.6;
         }
         .shipments-list {
             margin-top: 32px;
@@ -716,7 +881,7 @@
             font-size: 0.82em;
             font-weight: 600;
         }
-        .execution-state-pill {
+        .execution-count-pill {
             display: inline-flex;
             align-items: center;
             padding: 4px 12px;
@@ -726,26 +891,6 @@
             color: #475569;
             font-size: 0.82em;
             font-weight: 600;
-        }
-        .execution-state-pill.is-planned {
-            background-color: #e2e8f0;
-            border-color: #cbd5e1;
-            color: #334155;
-        }
-        .execution-state-pill.is-in-progress {
-            background-color: #dbeafe;
-            border-color: #93c5fd;
-            color: #1d4ed8;
-        }
-        .execution-state-pill.is-on-hold {
-            background-color: #fef3c7;
-            border-color: #fcd34d;
-            color: #92400e;
-        }
-        .execution-state-pill.is-completed {
-            background-color: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
         }
         .shipment-overview-grid {
             display: grid;
@@ -1118,6 +1263,9 @@
             .execution-controls-grid {
                 grid-template-columns: 1fr;
             }
+            .execution-control-form-grid {
+                grid-template-columns: 1fr;
+            }
             .points-paragraph {
                 font-size: 1.02em;
             }
@@ -1156,6 +1304,9 @@
                 width: 100%;
                 margin: 0;
             }
+            .stage-choice {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -1179,29 +1330,62 @@
             <section class="execution-controls-section" aria-labelledby="executionControlsTitle">
                 <div class="execution-controls-header">
                     <div>
-                        <h3 id="executionControlsTitle">Execution Controls</h3>
-                        <p>Select a shipment and move it through its execution lifecycle without leaving the tracker view.</p>
+                        <h3 id="executionControlsTitle">Sales Order Execution Controls</h3>
+                        <p>Maintain execution controls as a separate list against each sales order or shipment, including the control type, checklist details, and the tracker milestones where verification is mandatory.</p>
                     </div>
-                    <div class="execution-status-badge is-planned" id="executionStatusBadge">No Shipment Selected</div>
+                    <div class="execution-context-badge is-empty" id="executionContextBadge">No Shipment Selected</div>
                 </div>
                 <div class="execution-controls-grid">
                     <div class="execution-control-field">
-                        <label for="executionShipmentSelect">Shipment</label>
+                        <label for="executionShipmentSelect">Shipment / Sales Order</label>
                         <select id="executionShipmentSelect">
                             <option value="">No shipments available</option>
                         </select>
                     </div>
-                    <div class="execution-control-field">
-                        <label for="executionUpdatedAt">Last Execution Update</label>
-                        <input type="text" id="executionUpdatedAt" value="-" readonly>
+                    <div class="execution-control-stat">
+                        <span class="execution-control-stat-label">Controls Configured</span>
+                        <strong class="execution-control-stat-value" id="executionControlsCount">0</strong>
+                    </div>
+                    <div class="execution-control-stat">
+                        <span class="execution-control-stat-label">Tracker Milestones</span>
+                        <strong class="execution-control-stat-value" id="executionMilestoneCount">0</strong>
                     </div>
                 </div>
-                <div class="execution-action-row">
-                    <button type="button" class="execution-action-btn start" id="executionStartBtn">Start</button>
-                    <button type="button" class="execution-action-btn hold" id="executionHoldBtn">Put On Hold</button>
-                    <button type="button" class="execution-action-btn resume" id="executionResumeBtn">Resume</button>
-                    <button type="button" class="execution-action-btn complete" id="executionCompleteBtn">Mark Complete</button>
-                    <button type="button" class="execution-action-btn reset" id="executionResetBtn">Reset</button>
+                <p class="execution-controls-summary" id="executionControlsSummary">Select a shipment to configure a separate execution-controls register against its tracker milestones.</p>
+                <form class="execution-control-form" id="executionControlForm">
+                    <div class="execution-control-form-grid">
+                        <div class="execution-control-field">
+                            <label for="executionControlType">Type of Execution Control</label>
+                            <select id="executionControlType" required>
+                                <option value="">Select control type...</option>
+                                <option value="Commercial">Commercial</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Shipping">Shipping</option>
+                            </select>
+                        </div>
+                        <div class="execution-control-field execution-control-field-wide">
+                            <label for="executionChecklistDetails">Control Checklist Details</label>
+                            <textarea id="executionChecklistDetails" placeholder="Enter the checklist items or verification notes required for this control..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="execution-control-stage-panel">
+                        <div class="execution-control-stage-header">
+                            <h4>Mandatory Verification Stage</h4>
+                            <span id="executionStageHint">Select the sales order tracker milestones where this control must be verified.</span>
+                        </div>
+                        <div class="execution-control-stage-list" id="executionVerificationStageList"></div>
+                    </div>
+                    <div class="execution-action-row">
+                        <button type="submit" class="execution-action-btn start" id="executionControlSubmitBtn">Add Control</button>
+                        <button type="button" class="execution-action-btn reset" id="executionControlFormResetBtn">Clear</button>
+                    </div>
+                </form>
+                <div class="execution-controls-list">
+                    <div class="execution-controls-list-header">
+                        <h4>Sales Order Execution Controls Register</h4>
+                        <span id="executionControlsListMeta">0 controls</span>
+                    </div>
+                    <div class="execution-controls-cards" id="executionControlsContainer"></div>
                 </div>
             </section>
 
@@ -1337,14 +1521,21 @@
         const optionalStageModal = document.getElementById('optionalStageModal');
         const optionalStageModalClose = document.getElementById('optionalStageModalClose');
         const executionShipmentSelect = document.getElementById('executionShipmentSelect');
-        const executionStatusBadge = document.getElementById('executionStatusBadge');
-        const executionUpdatedAt = document.getElementById('executionUpdatedAt');
-        const executionStartBtn = document.getElementById('executionStartBtn');
-        const executionHoldBtn = document.getElementById('executionHoldBtn');
-        const executionResumeBtn = document.getElementById('executionResumeBtn');
-        const executionCompleteBtn = document.getElementById('executionCompleteBtn');
-        const executionResetBtn = document.getElementById('executionResetBtn');
+        const executionContextBadge = document.getElementById('executionContextBadge');
+        const executionControlsCount = document.getElementById('executionControlsCount');
+        const executionMilestoneCount = document.getElementById('executionMilestoneCount');
+        const executionControlsSummary = document.getElementById('executionControlsSummary');
+        const executionControlForm = document.getElementById('executionControlForm');
+        const executionControlType = document.getElementById('executionControlType');
+        const executionChecklistDetails = document.getElementById('executionChecklistDetails');
+        const executionVerificationStageList = document.getElementById('executionVerificationStageList');
+        const executionStageHint = document.getElementById('executionStageHint');
+        const executionControlSubmitBtn = document.getElementById('executionControlSubmitBtn');
+        const executionControlFormResetBtn = document.getElementById('executionControlFormResetBtn');
+        const executionControlsListMeta = document.getElementById('executionControlsListMeta');
+        const executionControlsContainer = document.getElementById('executionControlsContainer');
         let editingShipmentIndex = null;
+        let editingExecutionControlIndex = null;
         let activeShipmentDraft = null;
         let addPlannerState = null;
         let suppressAddPlannerScrollSync = false;
@@ -1372,22 +1563,64 @@
         executionShipmentSelect.addEventListener('change', function () {
             const nextIndex = Number(executionShipmentSelect.value);
             selectedExecutionShipmentIndex = Number.isNaN(nextIndex) ? 0 : nextIndex;
+            editingExecutionControlIndex = null;
             renderExecutionControls();
         });
-        executionStartBtn.addEventListener('click', function () {
-            updateExecutionStatus('In Progress');
+        executionControlForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const shipment = getSelectedExecutionShipment();
+            if (!shipment) {
+                return;
+            }
+
+            const controlType = executionControlType.value;
+            const checklistDetails = executionChecklistDetails.value.trim();
+            const verificationStages = Array.from(executionVerificationStageList.querySelectorAll('input:checked')).map(function (input) {
+                return input.value;
+            });
+
+            if (!controlType) {
+                alert('Please select the type of execution control.');
+                return;
+            }
+
+            if (!checklistDetails) {
+                alert('Please enter the control checklist details.');
+                return;
+            }
+
+            if (!verificationStages.length) {
+                alert('Please select at least one verification stage from the sales order tracker milestones.');
+                return;
+            }
+
+            ensureExecutionControlsCollection(shipment);
+            const existingControl = editingExecutionControlIndex === null
+                ? null
+                : shipment.executionControls[editingExecutionControlIndex];
+            const timestamp = getActivityTimestamp();
+            const executionControl = {
+                id: existingControl ? existingControl.id : `CTRL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                type: controlType,
+                checklistDetails,
+                verificationStages,
+                createdAt: existingControl ? existingControl.createdAt : timestamp,
+                updatedAt: timestamp
+            };
+
+            if (editingExecutionControlIndex === null) {
+                shipment.executionControls.push(executionControl);
+            } else {
+                shipment.executionControls[editingExecutionControlIndex] = executionControl;
+            }
+
+            editingExecutionControlIndex = null;
+            displayShipments();
         });
-        executionHoldBtn.addEventListener('click', function () {
-            updateExecutionStatus('On Hold');
-        });
-        executionResumeBtn.addEventListener('click', function () {
-            updateExecutionStatus('In Progress');
-        });
-        executionCompleteBtn.addEventListener('click', function () {
-            updateExecutionStatus('Completed');
-        });
-        executionResetBtn.addEventListener('click', function () {
-            updateExecutionStatus('Planned');
+        executionControlFormResetBtn.addEventListener('click', function () {
+            editingExecutionControlIndex = null;
+            renderExecutionControls();
         });
 
         shipmentForm.addEventListener('submit', function(e) {
@@ -1408,12 +1641,20 @@
                 id: shipmentId,
                 type: shipmentType,
                 timeline,
-                executionStatus: existingShipment && existingShipment.executionStatus
-                    ? existingShipment.executionStatus
-                    : 'Planned',
-                executionUpdatedAt: existingShipment && existingShipment.executionUpdatedAt
-                    ? existingShipment.executionUpdatedAt
-                    : ''
+                executionControls: existingShipment && Array.isArray(existingShipment.executionControls)
+                    ? existingShipment.executionControls.map(function (control) {
+                        return {
+                            id: control.id,
+                            type: control.type,
+                            checklistDetails: control.checklistDetails,
+                            verificationStages: Array.isArray(control.verificationStages)
+                                ? control.verificationStages.slice()
+                                : [],
+                            createdAt: control.createdAt || '',
+                            updatedAt: control.updatedAt || ''
+                        };
+                    })
+                    : []
             };
 
             if (editingShipmentIndex === null) {
@@ -1774,6 +2015,175 @@
             }).join('');
         }
 
+        function ensureExecutionControlsCollection(shipment) {
+            if (!Array.isArray(shipment.executionControls)) {
+                shipment.executionControls = [];
+            }
+        }
+
+        function getActivityTimestamp() {
+            return new Date().toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getSelectedExecutionShipment() {
+            if (!shipments.length) {
+                return null;
+            }
+
+            if (selectedExecutionShipmentIndex < 0 || selectedExecutionShipmentIndex >= shipments.length) {
+                selectedExecutionShipmentIndex = 0;
+            }
+
+            const shipment = shipments[selectedExecutionShipmentIndex] || null;
+            if (shipment) {
+                ensureExecutionControlsCollection(shipment);
+            }
+            return shipment;
+        }
+
+        function renderVerificationStageChoices(shipment, selectedStages) {
+            executionVerificationStageList.innerHTML = '';
+
+            if (!shipment || !shipment.timeline.length) {
+                executionVerificationStageList.innerHTML = '<div class="empty-state">Add tracker milestones to a shipment before mapping execution controls to verification stages.</div>';
+                executionStageHint.textContent = 'No milestones available for verification mapping.';
+                return;
+            }
+
+            const selectedStageSet = new Set(selectedStages || []);
+            executionStageHint.textContent = `${shipment.timeline.length} sales order tracker milestones available for verification mapping.`;
+            executionVerificationStageList.innerHTML = shipment.timeline.map(function (stage, index) {
+                const stageDate = parseLocalDate(stage.date);
+                const isChecked = selectedStageSet.has(stage.name) ? 'checked' : '';
+                return `
+                    <label class="stage-choice">
+                        <input type="checkbox" value="${stage.name}" ${isChecked}>
+                        <span class="stage-choice-details">
+                            <span class="stage-choice-name">${index + 1}. ${stage.name}</span>
+                            <span class="stage-choice-date">${stageDate ? formatDisplayDate(stageDate) : 'Date pending'}</span>
+                        </span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function updateExecutionControlFormState(shipment) {
+            const editingControl = shipment && editingExecutionControlIndex !== null
+                ? shipment.executionControls[editingExecutionControlIndex] || null
+                : null;
+
+            executionControlType.disabled = !shipment;
+            executionChecklistDetails.disabled = !shipment;
+            executionControlSubmitBtn.disabled = !shipment;
+            executionControlFormResetBtn.disabled = !shipment;
+
+            if (!shipment) {
+                executionControlType.value = '';
+                executionChecklistDetails.value = '';
+                executionControlSubmitBtn.textContent = 'Add Control';
+                executionControlFormResetBtn.textContent = 'Clear';
+                renderVerificationStageChoices(null, []);
+                return;
+            }
+
+            executionControlType.value = editingControl ? editingControl.type : '';
+            executionChecklistDetails.value = editingControl ? editingControl.checklistDetails : '';
+            executionControlSubmitBtn.textContent = editingControl ? 'Save Control' : 'Add Control';
+            executionControlFormResetBtn.textContent = editingControl ? 'Cancel Edit' : 'Clear';
+            renderVerificationStageChoices(shipment, editingControl ? editingControl.verificationStages : []);
+        }
+
+        function renderExecutionControls() {
+            const hasShipments = shipments.length > 0;
+
+            if (!hasShipments) {
+                executionShipmentSelect.innerHTML = '<option value="">No shipments available</option>';
+                executionShipmentSelect.disabled = true;
+                executionContextBadge.textContent = 'No Shipment Selected';
+                executionContextBadge.className = 'execution-context-badge is-empty';
+                executionControlsCount.textContent = '0';
+                executionMilestoneCount.textContent = '0';
+                executionControlsSummary.textContent = 'Add a shipment first, then create a separate register of execution controls against its sales order tracker milestones.';
+                executionControlsListMeta.textContent = '0 controls';
+                executionControlsContainer.innerHTML = '<div class="empty-state">No execution controls available because no shipment or sales order has been added yet.</div>';
+                editingExecutionControlIndex = null;
+                updateExecutionControlFormState(null);
+                return;
+            }
+
+            if (selectedExecutionShipmentIndex < 0 || selectedExecutionShipmentIndex >= shipments.length) {
+                selectedExecutionShipmentIndex = 0;
+            }
+
+            executionShipmentSelect.disabled = false;
+            executionShipmentSelect.innerHTML = shipments.map(function (shipment, index) {
+                return `<option value="${index}">${shipment.id} • ${shipment.type}</option>`;
+            }).join('');
+            executionShipmentSelect.value = String(selectedExecutionShipmentIndex);
+
+            const shipment = getSelectedExecutionShipment();
+            const controls = shipment.executionControls;
+            const coveredStages = new Set();
+            controls.forEach(function (control) {
+                (control.verificationStages || []).forEach(function (stageName) {
+                    coveredStages.add(stageName);
+                });
+            });
+
+            executionContextBadge.textContent = `${shipment.id} • ${shipment.type}`;
+            executionContextBadge.className = 'execution-context-badge';
+            executionControlsCount.textContent = String(controls.length);
+            executionMilestoneCount.textContent = String(shipment.timeline.length);
+            executionControlsSummary.textContent = controls.length
+                ? `${controls.length} execution control${controls.length === 1 ? '' : 's'} configured. ${coveredStages.size} tracker milestone${coveredStages.size === 1 ? '' : 's'} currently mapped for mandatory verification.`
+                : 'No execution controls have been added yet for this shipment. Use the form below to create the controls register.';
+            executionControlsListMeta.textContent = `${controls.length} control${controls.length === 1 ? '' : 's'}`;
+
+            if (editingExecutionControlIndex !== null && !controls[editingExecutionControlIndex]) {
+                editingExecutionControlIndex = null;
+            }
+            updateExecutionControlFormState(shipment);
+
+            if (!controls.length) {
+                executionControlsContainer.innerHTML = '<div class="empty-state">No sales order execution controls have been configured for the selected shipment yet.</div>';
+                return;
+            }
+
+            executionControlsContainer.innerHTML = controls.map(function (control, index) {
+                const verificationMarkup = (control.verificationStages || []).map(function (stageName) {
+                    return `<span class="execution-control-pill">${stageName}</span>`;
+                }).join('');
+                return `
+                    <article class="execution-control-card">
+                        <div class="execution-control-card-header">
+                            <div>
+                                <div class="execution-control-card-title">${control.type} Control</div>
+                                <div class="execution-control-card-meta">
+                                    <span class="execution-control-pill">Created ${control.createdAt || '-'}</span>
+                                    <span class="execution-control-pill">Updated ${control.updatedAt || '-'}</span>
+                                </div>
+                            </div>
+                            <div class="shipment-actions">
+                                <button class="edit-shipment-btn" onclick="editExecutionControl(${index})">Edit</button>
+                                <button class="remove-shipment-btn" onclick="removeExecutionControl(${index})">Remove</button>
+                            </div>
+                        </div>
+                        <div class="execution-control-details">${control.checklistDetails}</div>
+                        <div class="execution-control-verification">
+                            <div class="execution-control-verification-label">To Be Verified At Stage Of Sales Order Execution</div>
+                            <div class="execution-control-verification-list">${verificationMarkup}</div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
         function displayShipments() {
             const container = document.getElementById('shipmentsContainer');
             const listDiv = document.getElementById('shipmentsList');
@@ -1788,7 +2198,7 @@
             container.innerHTML = '';
 
             shipments.forEach((shipment, index) => {
-                ensureExecutionState(shipment);
+                ensureExecutionControlsCollection(shipment);
                 const card = document.createElement('div');
                 card.className = 'shipment-card';
 
@@ -1830,7 +2240,13 @@
                 const completionPercent = totalStageCount
                     ? Math.round((plannedStageCount / totalStageCount) * 100)
                     : 0;
-                const executionStatusClassName = getExecutionStatusClassName(shipment.executionStatus);
+                const verificationCoverageCount = new Set(
+                    shipment.executionControls.flatMap(function (control) {
+                        return Array.isArray(control.verificationStages)
+                            ? control.verificationStages
+                            : [];
+                    })
+                ).size;
 
                 card.innerHTML = `
                     <div class="shipment-header">
@@ -1842,7 +2258,7 @@
                     </div>
                     <div class="shipment-meta">
                         <span class="shipment-type-pill">${shipment.type}</span>
-                        <span class="execution-state-pill ${executionStatusClassName}">${shipment.executionStatus}</span>
+                        <span class="execution-count-pill">${shipment.executionControls.length} control${shipment.executionControls.length === 1 ? '' : 's'}</span>
                     </div>
                     <div class="shipment-overview-grid">
                         <div class="overview-item">
@@ -1862,8 +2278,12 @@
                             <div class="overview-value">${plannedSpanDays ? formatSpanAsMonthsWeeksDays(plannedSpanDays) : '-'}</div>
                         </div>
                         <div class="overview-item">
-                            <div class="overview-label">Execution Updated</div>
-                            <div class="overview-value">${shipment.executionUpdatedAt || '-'}</div>
+                            <div class="overview-label">Controls Configured</div>
+                            <div class="overview-value">${shipment.executionControls.length}</div>
+                        </div>
+                        <div class="overview-item">
+                            <div class="overview-label">Verification Coverage</div>
+                            <div class="overview-value">${verificationCoverageCount}/${totalStageCount}</div>
                         </div>
                     </div>
                     <div class="shipment-progress">
@@ -1889,86 +2309,28 @@
             renderExecutionControls();
         }
 
-        function ensureExecutionState(shipment) {
-            if (!shipment.executionStatus) {
-                shipment.executionStatus = 'Planned';
-            }
-            if (!shipment.executionUpdatedAt) {
-                shipment.executionUpdatedAt = '';
-            }
-        }
-
-        function getExecutionStatusClassName(status) {
-            switch (status) {
-                case 'In Progress':
-                    return 'is-in-progress';
-                case 'On Hold':
-                    return 'is-on-hold';
-                case 'Completed':
-                    return 'is-completed';
-                default:
-                    return 'is-planned';
-            }
-        }
-
-        function getExecutionStatusTimestamp() {
-            return new Date().toLocaleString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function renderExecutionControls() {
-            const hasShipments = shipments.length > 0;
-            if (!hasShipments) {
-                executionShipmentSelect.innerHTML = '<option value="">No shipments available</option>';
-                executionShipmentSelect.disabled = true;
-                executionStatusBadge.textContent = 'No Shipment Selected';
-                executionStatusBadge.className = 'execution-status-badge is-planned';
-                executionUpdatedAt.value = '-';
-                [executionStartBtn, executionHoldBtn, executionResumeBtn, executionCompleteBtn, executionResetBtn].forEach(function (button) {
-                    button.disabled = true;
-                });
-                selectedExecutionShipmentIndex = 0;
+        function editExecutionControl(index) {
+            const shipment = getSelectedExecutionShipment();
+            if (!shipment || !shipment.executionControls[index]) {
                 return;
             }
 
-            if (selectedExecutionShipmentIndex < 0 || selectedExecutionShipmentIndex >= shipments.length) {
-                selectedExecutionShipmentIndex = 0;
-            }
-
-            executionShipmentSelect.disabled = false;
-            executionShipmentSelect.innerHTML = shipments.map(function (shipment, index) {
-                return `<option value="${index}">${shipment.id} • ${shipment.type}</option>`;
-            }).join('');
-            executionShipmentSelect.value = String(selectedExecutionShipmentIndex);
-
-            const selectedShipment = shipments[selectedExecutionShipmentIndex];
-            ensureExecutionState(selectedShipment);
-            executionStatusBadge.textContent = selectedShipment.executionStatus;
-            executionStatusBadge.className = `execution-status-badge ${getExecutionStatusClassName(selectedShipment.executionStatus)}`;
-            executionUpdatedAt.value = selectedShipment.executionUpdatedAt || '-';
-
-            [executionStartBtn, executionHoldBtn, executionResumeBtn, executionCompleteBtn, executionResetBtn].forEach(function (button) {
-                button.disabled = false;
-            });
+            editingExecutionControlIndex = index;
+            renderExecutionControls();
         }
 
-        function updateExecutionStatus(nextStatus) {
-            if (!shipments.length) {
+        function removeExecutionControl(index) {
+            const shipment = getSelectedExecutionShipment();
+            if (!shipment || !shipment.executionControls[index]) {
                 return;
             }
 
-            const shipment = shipments[selectedExecutionShipmentIndex];
-            if (!shipment) {
-                return;
+            shipment.executionControls.splice(index, 1);
+            if (editingExecutionControlIndex === index) {
+                editingExecutionControlIndex = null;
+            } else if (editingExecutionControlIndex !== null && editingExecutionControlIndex > index) {
+                editingExecutionControlIndex -= 1;
             }
-
-            shipment.executionStatus = nextStatus;
-            shipment.executionUpdatedAt = getExecutionStatusTimestamp();
             displayShipments();
         }
 
@@ -2316,6 +2678,8 @@
         renderExecutionControls();
         window.openEditShipment = openEditShipment;
         window.removeShipment = removeShipment;
+        window.editExecutionControl = editExecutionControl;
+        window.removeExecutionControl = removeExecutionControl;
     </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
