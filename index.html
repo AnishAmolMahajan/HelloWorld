@@ -1,1 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Everyone</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @keyframes waveFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, 
+                #FF0000 0%, 
+                #FF7F00 8%, 
+                #FFFF00 16%, 
+                #00FF00 24%, 
+                #0000FF 32%, 
+                #4B0082 40%, 
+                #9400D3 48%,
+                #FF0000 56%,
+                #FF7F00 64%,
+                #FFFF00 72%,
+                #00FF00 80%,
+                #0000FF 88%,
+                #4B0082 96%,
+                #9400D3 100%);
+            background-size: 200% 200%;
+            font-family: 'Poppins', sans-serif;
+            animation: waveFlow 8s ease-in-out infinite;
+        }
+        header {
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid white;
+        }
+        header h1 {
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .header-buttons {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .header-buttons button {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            color: #111111;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .header-buttons button:hover {
+            background-color: #f1f1f1;
+            transform: translateY(-1px);
+        }
+        .color-picker {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            display: none;
+            grid-template-columns: repeat(4, 34px);
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+        }
+        .color-picker.show {
+            display: grid;
+        }
+        .color-option {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .color-option:hover {
+            transform: scale(1.08);
+        }
+        @media (max-width: 700px) {
+            header {
+                padding-bottom: 70px;
+            }
+            .header-buttons {
+                top: auto;
+                right: 50%;
+                bottom: 16px;
+                transform: translateX(50%);
+            }
+            .color-picker {
+                right: 50%;
+                transform: translateX(50%);
+            }
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        main h1 {
+            color: white;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        main p {
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            max-width: 600px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            line-height: 1.6;
+        }
+        .repositories {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .repositories h2 {
+            color: white;
+            font-size: 2em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        .repositories ul {
+            list-style: none;
+            color: white;
+            font-size: 1.1em;
+        }
+        .repositories li {
+            padding: 10px 20px;
+            margin: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: inline-block;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .repositories li a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .repositories li a:hover {
+            color: #FFD700;
+            text-decoration: underline;
+        }
+        footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-top: 2px solid white;
+            color: white;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Website</h1>
+        <div class="header-buttons">
+            <button id="rainbowButton" type="button">Rainbow</button>
+            <button id="colorsButton" type="button">Colors</button>
+            <div id="colorPicker" class="color-picker" aria-label="Background color options">
+                <button type="button" class="color-option" data-color="#ff0000" title="Red" style="background:#ff0000"></button>
+                <button type="button" class="color-option" data-color="#ff7f00" title="Orange" style="background:#ff7f00"></button>
+                <button type="button" class="color-option" data-color="#ffff00" title="Yellow" style="background:#ffff00"></button>
+                <button type="button" class="color-option" data-color="#00ff00" title="Green" style="background:#00ff00"></button>
+                <button type="button" class="color-option" data-color="#0000ff" title="Blue" style="background:#0000ff"></button>
+                <button type="button" class="color-option" data-color="#4b0082" title="Indigo" style="background:#4b0082"></button>
+                <button type="button" class="color-option" data-color="#9400d3" title="Violet" style="background:#9400d3"></button>
+                <button type="button" class="color-option" data-color="#0f172a" title="Midnight" style="background:#0f172a"></button>
+                <button type="button" class="color-option" data-color="#1e293b" title="Slate" style="background:#1e293b"></button>
+                <button type="button" class="color-option" data-color="#14532d" title="Forest" style="background:#14532d"></button>
+                <button type="button" class="color-option" data-color="#7f1d1d" title="Ruby" style="background:#7f1d1d"></button>
+                <button type="button" class="color-option" data-color="#1e3a8a" title="Royal Blue" style="background:#1e3a8a"></button>
+                <button type="button" class="color-option" data-color="#0c4a6e" title="Ocean" style="background:#0c4a6e"></button>
+                <button type="button" class="color-option" data-color="#854d0e" title="Amber" style="background:#854d0e"></button>
+                <button type="button" class="color-option" data-color="#4a044e" title="Violet" style="background:#4a044e"></button>
+                <button type="button" class="color-option" data-color="#7c2d12" title="Cedar" style="background:#7c2d12"></button>
+                <button type="button" class="color-option" data-color="#111827" title="Charcoal" style="background:#111827"></button>
+                <button type="button" class="color-option" data-color="#374151" title="Graphite" style="background:#374151"></button>
+                <button type="button" class="color-option" data-color="#0f766e" title="Teal" style="background:#0f766e"></button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <h1>Hello Everyone</h1>
+        <p>My name is Anish and I love coding! Today, I want to share some of my repositories with you.
+            These repositories can get you up to speed about coding languages and how to use them.
+        </p>
+        <div class="repositories">
+            <h2>My Repositories</h2>
+            <ul>
+                <li><a href="HTMLLearning.html">HTML Learning</a></li>
+                <li><a href="CSSTricks.html">CSS Tricks</a></li>
+                <li><a href="JavaScriptFundamentals.html">JavaScript Fundamentals</a></li>
+                <li><a href="PythonPowerhouse.html">Python Powerhouse</a></li>
+                <li><a href="calculator.html">Calculator</a></li>
+            </ul>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2026 Hello Everyone. All rights reserved.</p>
+        <p>Author: 😊 Anish Mahajan 😊</p>
+    </footer>
+    <script>
+        const body = document.body;
+        const colorsButton = document.getElementById('colorsButton');
+        const rainbowButton = document.getElementById('rainbowButton');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const originalRainbow = 'linear-gradient(135deg, #FF0000 0%, #FF7F00 8%, #FFFF00 16%, #00FF00 24%, #0000FF 32%, #4B0082 40%, #9400D3 48%, #FF0000 56%, #FF7F00 64%, #FFFF00 72%, #00FF00 80%, #0000FF 88%, #4B0082 96%, #9400D3 100%)';
+
+        function setSolidBackground(color) {
+            body.style.animation = 'none';
+            body.style.backgroundImage = 'none';
+            body.style.backgroundColor = color;
+        }
+
+        function setRainbowBackground() {
+            body.style.background = originalRainbow;
+            body.style.backgroundSize = '200% 200%';
+            body.style.backgroundPosition = '0% 0%';
+            body.style.animation = 'waveFlow 8s ease-in-out infinite';
+        }
+
+        colorsButton.addEventListener('click', function () {
+            colorPicker.classList.toggle('show');
+        });
+
+        rainbowButton.addEventListener('click', function () {
+            colorPicker.classList.remove('show');
+            setRainbowBackground();
+        });
+
+        colorOptions.forEach(function (option) {
+            option.addEventListener('click', function () {
+                const selectedColor = option.getAttribute('data-color');
+                setSolidBackground(selectedColor);
+                colorPicker.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!colorPicker.contains(event.target) && event.target !== colorsButton) {
+                colorPicker.classList.remove('show');
+            }
+        });
+    </script>
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/69bdae15cfaccd1c35824e9a/1jk6f02al';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <!--End of Tawk.to Script-->
+</body>
+</html>
 <li><a href="TowerQuizGame.html">Tower Quiz Game</a></li>
