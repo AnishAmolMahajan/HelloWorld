@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Quiz Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @keyframes waveFlow {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        @keyframes blockSlideIn {
+            from { transform: translateY(-40px) scaleX(0.6); opacity: 0; }
+            to   { transform: translateY(0) scaleX(1); opacity: 1; }
+        }
+        @keyframes blockFall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(80px) rotate(20deg); opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.06); }
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg,
+                #FF0000 0%, #FF7F00 8%, #FFFF00 16%, #00FF00 24%,
+                #0000FF 32%, #4B0082 40%, #9400D3 48%,
+                #FF0000 56%, #FF7F00 64%, #FFFF00 72%,
+                #00FF00 80%, #0000FF 88%, #4B0082 96%, #9400D3 100%);
+            background-size: 200% 200%;
+            font-family: 'Poppins', sans-serif;
+            animation: waveFlow 8s ease-in-out infinite;
+        }
+        header {
+            background-color: rgba(0, 0, 0, 0.25);
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.4);
+        }
+        header h1 {
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        header a.home-link {
+            display: inline-block;
+            margin-top: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9em;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        header a.home-link:hover { opacity: 1; text-decoration: underline; }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px 16px 40px;
+            gap: 24px;
+        }
+
+        /* ── Tower Panel ── */
+        .tower-panel {
+            flex: 0 0 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .tower-panel h2 {
+            color: white;
+            font-size: 1.1em;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+        .score-badge {
+            background: rgba(0,0,0,0.35);
+            color: #ffe066;
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .tower-scene {
+            width: 160px;
+            min-height: 360px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            position: relative;
+        }
+        .tower-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 3px;
+        }
+        .block {
+            width: 90%;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 700;
+            color: rgba(0,0,0,0.6);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+            animation: blockSlideIn 0.35s ease-out;
+        }
+        .block.falling {
+            animation: blockFall 0.45s ease-in forwards;
+        }
+        .ground {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(180deg, #a0622a, #7a4c1c);
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            margin-top: 4px;
+        }
+        .level-label {
+            color: white;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* ── Quiz Panel ── */
+        .quiz-panel {
+            flex: 1;
+            max-width: 540px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .quiz-card {
+            background: rgba(10, 10, 25, 0.82);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .question-meta {
+            font-size: 0.78em;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .question-text {
+            color: white;
+            font-size: 1.15em;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .option-btn {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.18);
+            border-radius: 10px;
+            padding: 12px 10px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+        .option-btn:disabled { cursor: default; }
+        .option-btn.correct {
+            background: rgba(34, 197, 94, 0.35);
+            border-color: #22c55e;
+            color: #bbf7d0;
+        }
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.35);
+            border-color: #ef4444;
+            color: #fecaca;
+        }
+
+        .feedback-bar {
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            padding: 8px 16px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .feedback-bar.correct {
+            background: rgba(34,197,94,0.22);
+            color: #86efac;
+        }
+        .feedback-bar.wrong {
+            background: rgba(239,68,68,0.22);
+            color: #fca5a5;
+            animation: shake 0.45s ease;
+        }
+        .feedback-bar.empty { background: transparent; }
+
+        .next-btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.15s;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .next-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .next-btn:hidden { display: none; }
+
+        .game-over-card {
+            background: rgba(10, 10, 25, 0.92);
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            display: none;
+        }
+        .game-over-card h2 {
+            color: #ffe066;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .game-over-card p {
+            color: rgba(255,255,255,0.8);
+            font-size: 1em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .restart-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.15s;
+        }
+        .restart-btn:hover { filter: brightness(1.15); transform: translateY(-2px); }
+
+        .progress-bar-wrap {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            main {
+                flex-direction: column;
+                align-items: center;
+                padding: 16px 12px 32px;
+            }
+            .tower-panel {
+                flex: none;
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: flex-end;
+                gap: 12px;
+            }
+            .tower-scene {
+                min-height: 180px;
+                width: 120px;
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            background-color: rgba(0,0,0,0.2);
+            padding: 16px 20px;
+            text-align: center;
+            border-top: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏗️ Tower Quiz Game</h1>
+        <a href="index.html" class="home-link">&#8592; Back to Home</a>
+    </header>
+
+    <main>
+        <!-- Tower Panel -->
+        <section class="tower-panel" aria-label="Tower">
+            <h2>🏢 Your Tower</h2>
+            <div class="score-badge" id="scoreDisplay">Score: 0</div>
+            <div class="level-label" id="levelDisplay">Level 1</div>
+            <div class="tower-scene">
+                <div class="tower-stack" id="towerStack"></div>
+                <div class="ground"></div>
+            </div>
+        </section>
+
+        <!-- Quiz Panel -->
+        <section class="quiz-panel" aria-label="Quiz">
+            <div class="quiz-card" id="quizCard">
+                <div class="question-meta" id="questionMeta">Question 1 of 10</div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="progressBar" style="width:10%"></div>
+                </div>
+                <br>
+                <div class="question-text" id="questionText">Loading...</div>
+                <div class="options-grid" id="optionsGrid"></div>
+                <br>
+                <div class="feedback-bar empty" id="feedbackBar"></div>
+                <br>
+                <button class="next-btn" id="nextBtn" style="display:none">Next Question ➜</button>
+            </div>
+
+            <div class="game-over-card" id="gameOverCard">
+                <h2 id="gameOverTitle">🎉 Game Over!</h2>
+                <p id="gameOverMsg">You finished the quiz!</p>
+                <button class="restart-btn" id="restartBtn">Play Again</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Hello Everyone. All rights reserved.</p>
+        <p>Author: 😊 Anish Mahajan 😊</p>
+    </footer>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ── Quiz Data ── */
+        var questions = [
+            { q: 'What does HTML stand for?', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Hyper Transfer Markup Logic', 'Home Tool Markup Language'], answer: 0 },
+            { q: 'Which CSS property changes the text color?', options: ['background-color', 'font-color', 'color', 'text-style'], answer: 2 },
+            { q: 'Which JavaScript keyword declares a constant?', options: ['var', 'let', 'const', 'def'], answer: 2 },
+            { q: 'What is the output of 2 + "2" in JavaScript?', options: ['"22"', '4', 'NaN', 'Error'], answer: 0 },
+            { q: 'Which HTML tag creates a hyperlink?', options: ['<link>', '<a>', '<href>', '<url>'], answer: 1 },
+            { q: 'What does CSS stand for?', options: ['Cascading Style Sheets', 'Computer Style System', 'Colorful Style Syntax', 'Creative Sheet System'], answer: 0 },
+            { q: 'Which of these is NOT a JavaScript data type?', options: ['String', 'Boolean', 'Float', 'Undefined'], answer: 2 },
+            { q: 'Which HTML element is used for the largest heading?', options: ['<h6>', '<h1>', '<heading>', '<head>'], answer: 1 },
+            { q: 'What does the "display: flex" CSS property do?', options: ['Makes element flexible in size', 'Enables flexbox layout', 'Hides the element', 'Adds animation'], answer: 1 },
+            { q: 'Which symbol is used for comments in JavaScript?', options: ['#', '//', '<!-- -->', '**'], answer: 1 },
+            { q: 'What is the correct way to call a JavaScript function named "greet"?', options: ['call greet()', 'greet()', 'function.greet()', 'run greet'], answer: 1 },
+            { q: 'Which CSS property controls spacing inside an element\'s border?', options: ['margin', 'spacing', 'padding', 'gap'], answer: 2 },
+            { q: 'What does the DOM stand for?', options: ['Document Object Model', 'Data Object Model', 'Digital Output Module', 'Document Output Method'], answer: 0 },
+            { q: 'Which Python function prints output to the console?', options: ['echo()', 'console.log()', 'print()', 'output()'], answer: 2 },
+            { q: 'What value does "typeof null" return in JavaScript?', options: ['"null"', '"undefined"', '"object"', '"boolean"'], answer: 2 }
+        ];
+
+        /* ── State ── */
+        var shuffled = [];
+        var currentIndex = 0;
+        var score = 0;
+        var towerBlocks = 0;
+        var answered = false;
+        var audioCtx = null;
+
+        /* ── DOM refs ── */
+        var questionMeta  = document.getElementById('questionMeta');
+        var questionText  = document.getElementById('questionText');
+        var optionsGrid   = document.getElementById('optionsGrid');
+        var feedbackBar   = document.getElementById('feedbackBar');
+        var nextBtn       = document.getElementById('nextBtn');
+        var quizCard      = document.getElementById('quizCard');
+        var gameOverCard  = document.getElementById('gameOverCard');
+        var gameOverTitle = document.getElementById('gameOverTitle');
+        var gameOverMsg   = document.getElementById('gameOverMsg');
+        var restartBtn    = document.getElementById('restartBtn');
+        var towerStack    = document.getElementById('towerStack');
+        var scoreDisplay  = document.getElementById('scoreDisplay');
+        var levelDisplay  = document.getElementById('levelDisplay');
+        var progressBar   = document.getElementById('progressBar');
+
+        /* ── Color palette for blocks ── */
+        var BLOCK_COLORS = [
+            '#ef4444','#f97316','#eab308','#22c55e',
+            '#06b6d4','#6366f1','#a855f7','#ec4899',
+            '#14b8a6','#84cc16','#f59e0b','#3b82f6'
+        ];
+
+        /* ── Audio ── */
+        function getAudioCtx() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playCorrectSound(level) {
+            try {
+                var ctx = getAudioCtx();
+                var volume = Math.min(0.15 + level * 0.055, 0.95);
+                var baseFreq = 300 + level * 30;
+
+                var notes = [baseFreq, baseFreq * 1.26, baseFreq * 1.5];
+                notes.forEach(function (freq, i) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+                    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + i * 0.12 + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.35);
+                    osc.start(ctx.currentTime + i * 0.12);
+                    osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+                });
+            } catch (e) { /* audio unavailable */ }
+        }
+
+        function playCrashSound() {
+            try {
+                var ctx = getAudioCtx();
+                var bufferSize = ctx.sampleRate * 0.6;
+                var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                var data = buffer.getChannelData(0);
+                for (var i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 1.5);
+                }
+                var source = ctx.createBufferSource();
+                source.buffer = buffer;
+
+                var filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 600;
+
+                var gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.7, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                source.start();
+            } catch (e) { /* audio unavailable */ }
+        }
+
+        /* ── Tower ── */
+        function addBlock() {
+            towerBlocks++;
+            var block = document.createElement('div');
+            block.className = 'block';
+            block.style.background = BLOCK_COLORS[towerBlocks % BLOCK_COLORS.length];
+            block.setAttribute('aria-label', 'Block ' + towerBlocks);
+            towerStack.insertBefore(block, towerStack.firstChild);
+            updateLevelDisplay();
+        }
+
+        function removeBlocks(count) {
+            for (var i = 0; i < count; i++) {
+                if (towerStack.firstChild) {
+                    var block = towerStack.firstChild;
+                    block.classList.add('falling');
+                    var toRemove = block;
+                    setTimeout(function (el) {
+                        if (el.parentNode) el.parentNode.removeChild(el);
+                    }, 450, toRemove);
+                    towerBlocks = Math.max(0, towerBlocks - 1);
+                }
+            }
+            updateLevelDisplay();
+        }
+
+        function updateLevelDisplay() {
+            var level = Math.floor(towerBlocks / 3) + 1;
+            levelDisplay.textContent = 'Level ' + level;
+        }
+
+        /* ── Quiz logic ── */
+        function shuffle(arr) {
+            var a = arr.slice();
+            for (var i = a.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+            }
+            return a;
+        }
+
+        function startGame() {
+            shuffled = shuffle(questions).slice(0, 10);
+            currentIndex = 0;
+            score = 0;
+            towerBlocks = 0;
+            answered = false;
+
+            while (towerStack.firstChild) towerStack.removeChild(towerStack.firstChild);
+
+            scoreDisplay.textContent = 'Score: 0';
+            levelDisplay.textContent = 'Level 1';
+            quizCard.style.display = '';
+            gameOverCard.style.display = 'none';
+            feedbackBar.className = 'feedback-bar empty';
+            feedbackBar.textContent = '';
+            nextBtn.style.display = 'none';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            feedbackBar.className = 'feedback-bar empty';
+            feedbackBar.textContent = '';
+            nextBtn.style.display = 'none';
+
+            var total = shuffled.length;
+            var q = shuffled[currentIndex];
+            questionMeta.textContent = 'Question ' + (currentIndex + 1) + ' of ' + total;
+            progressBar.style.width = ((currentIndex + 1) / total * 100) + '%';
+            questionText.textContent = q.q;
+
+            optionsGrid.innerHTML = '';
+            q.options.forEach(function (opt, idx) {
+                var btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.setAttribute('aria-label', 'Option ' + (idx + 1) + ': ' + opt);
+                btn.addEventListener('click', function () { handleAnswer(idx, q.answer); });
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(chosen, correct) {
+            if (answered) return;
+            answered = true;
+
+            var buttons = optionsGrid.querySelectorAll('.option-btn');
+            buttons.forEach(function (b) { b.disabled = true; });
+
+            var level = Math.floor(towerBlocks / 3) + 1;
+
+            if (chosen === correct) {
+                buttons[chosen].classList.add('correct');
+                score += 10 * level;
+                scoreDisplay.textContent = 'Score: ' + score;
+                addBlock();
+                playCorrectSound(towerBlocks);
+                feedbackBar.className = 'feedback-bar correct';
+                feedbackBar.textContent = '✅ Correct! +' + (10 * level) + ' points';
+            } else {
+                buttons[chosen].classList.add('wrong');
+                buttons[correct].classList.add('correct');
+                removeBlocks(2);
+                playCrashSound();
+                feedbackBar.className = 'feedback-bar wrong';
+                feedbackBar.textContent = '❌ Wrong! The correct answer was: ' + shuffled[currentIndex].options[correct];
+            }
+
+            if (currentIndex + 1 < shuffled.length) {
+                nextBtn.style.display = '';
+            } else {
+                setTimeout(showGameOver, 900);
+            }
+        }
+
+        function showGameOver() {
+            quizCard.style.display = 'none';
+            gameOverCard.style.display = '';
+            var maxScore = shuffled.reduce(function (acc, _, i) { return acc + 10 * (Math.floor(i / 3) + 1); }, 0);
+            var pct = Math.round(score / Math.max(maxScore, 1) * 100);
+            if (towerBlocks >= 8) {
+                gameOverTitle.textContent = '🏆 Amazing!';
+                gameOverMsg.textContent = 'Your tower stands ' + towerBlocks + ' blocks tall! Final score: ' + score + ' (' + pct + '%). You\'re a quiz master!';
+            } else if (towerBlocks >= 4) {
+                gameOverTitle.textContent = '🎉 Well Done!';
+                gameOverMsg.textContent = 'Your tower stands ' + towerBlocks + ' blocks tall! Final score: ' + score + ' (' + pct + '%). Keep practising!';
+            } else {
+                gameOverTitle.textContent = '🏗️ Keep Building!';
+                gameOverMsg.textContent = 'Your tower stands ' + towerBlocks + ' blocks tall. Final score: ' + score + '. Give it another try!';
+            }
+        }
+
+        nextBtn.addEventListener('click', function () {
+            currentIndex++;
+            loadQuestion();
+        });
+
+        restartBtn.addEventListener('click', startGame);
+
+        /* ── Start ── */
+        startGame();
+    })();
+    </script>
+</body>
+</html>
