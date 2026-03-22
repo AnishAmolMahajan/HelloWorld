@@ -892,6 +892,15 @@
             font-size: 0.82em;
             font-weight: 600;
         }
+        .execution-count-pill-button {
+            border: none;
+            cursor: pointer;
+        }
+        .execution-count-pill-button:hover {
+            background-color: #e8f0ff;
+            border-color: #c4d7ff;
+            color: #1e3a8a;
+        }
         .shipment-overview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -2290,7 +2299,7 @@
                     return `<span class="execution-control-pill">${stageName}</span>`;
                 }).join('');
                 return `
-                    <article class="execution-control-card">
+                    <article class="execution-control-card" onclick="editExecutionControl(${index})" style="cursor: pointer;">
                         <div class="execution-control-card-header">
                             <div>
                                 <div class="execution-control-card-title">${control.type} | ${control.category || 'Uncategorized'}</div>
@@ -2300,8 +2309,8 @@
                                 </div>
                             </div>
                             <div class="shipment-actions">
-                                <button class="edit-shipment-btn" onclick="editExecutionControl(${index})">Edit</button>
-                                <button class="remove-shipment-btn" onclick="removeExecutionControl(${index})">Remove</button>
+                                <button class="edit-shipment-btn" onclick="event.stopPropagation(); editExecutionControl(${index});">Edit</button>
+                                <button class="remove-shipment-btn" onclick="event.stopPropagation(); removeExecutionControl(${index});">Remove</button>
                             </div>
                         </div>
                         <div class="execution-control-details">${control.checklistDetails}</div>
@@ -2332,17 +2341,29 @@
                 card.className = 'shipment-card';
                 const autoAppliedControls = getAutoAppliedControlsForShipment(shipment);
                 const checkpointCategoryCounts = autoAppliedControls.reduce(function (accumulator, control) {
-                    const categoryLabel = control.category
-                        ? `${control.type}: ${control.category}`
-                        : (control.type || 'Other');
-                    accumulator[categoryLabel] = (accumulator[categoryLabel] || 0) + 1;
+                    const categoryLabel = control.category || 'Uncategorized';
+                    const typeLabel = control.type || 'Other';
+                    const aggregateKey = `${typeLabel}__${categoryLabel}`;
+
+                    if (!accumulator[aggregateKey]) {
+                        accumulator[aggregateKey] = {
+                            type: typeLabel,
+                            category: categoryLabel,
+                            count: 0
+                        };
+                    }
+
+                    accumulator[aggregateKey].count += 1;
                     return accumulator;
                 }, {});
-                const checkpointCategorySummary = Object.keys(checkpointCategoryCounts).length
-                    ? Object.keys(checkpointCategoryCounts).map(function (category) {
-                        return `${category}: ${checkpointCategoryCounts[category]}`;
-                    }).join(' | ')
-                    : 'No checkpoints auto-applied';
+                const checkpointCategorySummaryMarkup = Object.keys(checkpointCategoryCounts).length
+                    ? Object.keys(checkpointCategoryCounts).sort().map(function (aggregateKey) {
+                        const summaryItem = checkpointCategoryCounts[aggregateKey];
+                        const encodedType = encodeURIComponent(summaryItem.type);
+                        const encodedCategory = encodeURIComponent(summaryItem.category);
+                        return `<button type="button" class="execution-count-pill execution-count-pill-button" onclick="openCheckpointFromShipment('${encodedType}', '${encodedCategory}')">${summaryItem.type}: ${summaryItem.category} (${summaryItem.count})</button>`;
+                    }).join(' ')
+                    : '<span class="execution-count-pill">No checkpoints auto-applied</span>';
 
                 const timelineHTML = buildTimelineMarkup(shipment.timeline);
                 const parsedDates = shipment.timeline
@@ -2400,7 +2421,7 @@
                     </div>
                     <div class="shipment-meta">
                         <span class="shipment-type-pill">${shipment.type}</span>
-                        <span class="execution-count-pill">${checkpointCategorySummary}</span>
+                        <span>${checkpointCategorySummaryMarkup}</span>
                     </div>
                     <div class="shipment-overview-grid">
                         <div class="overview-item">
@@ -2457,6 +2478,22 @@
             }
 
             openExecutionControlModal(index);
+        }
+
+        function openCheckpointFromShipment(encodedType, encodedCategory) {
+            const type = decodeURIComponent(encodedType || '');
+            const category = decodeURIComponent(encodedCategory || '');
+
+            const matchingIndex = checkpointDefinitions.findIndex(function (control) {
+                return (control.type || '') === type && (control.category || 'Uncategorized') === category;
+            });
+
+            if (matchingIndex === -1) {
+                alert('Checkpoint details are not available for the selected term.');
+                return;
+            }
+
+            openExecutionControlModal(matchingIndex);
         }
 
         function removeExecutionControl(index) {
@@ -2816,6 +2853,7 @@
         window.removeShipment = removeShipment;
         window.editExecutionControl = editExecutionControl;
         window.removeExecutionControl = removeExecutionControl;
+        window.openCheckpointFromShipment = openCheckpointFromShipment;
     </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
