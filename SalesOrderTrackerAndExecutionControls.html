@@ -1330,28 +1330,28 @@
             <section class="execution-controls-section" aria-labelledby="executionControlsTitle">
                 <div class="execution-controls-header">
                     <div>
-                        <h3 id="executionControlsTitle">Sales Order Execution Controls</h3>
-                        <p>Maintain execution controls as a separate list against each sales order or shipment, including the control type, checklist details, and the tracker milestones where verification is mandatory.</p>
+                        <h3 id="executionControlsTitle">Checkpoint Definition Library</h3>
+                        <p>Define checkpoints once, map them to tracker stages, and they will be auto-applied to every shipment that includes those stages.</p>
                     </div>
-                    <div class="execution-context-badge is-empty" id="executionContextBadge">No Shipment Selected</div>
+                    <div class="execution-context-badge" id="executionContextBadge">Global Stage Mapping</div>
                 </div>
                 <div class="execution-controls-grid">
                     <div class="execution-control-field">
-                        <label for="executionShipmentSelect">Shipment / Sales Order</label>
+                        <label for="executionShipmentSelect">Shipment Type Stage Context</label>
                         <select id="executionShipmentSelect">
-                            <option value="">No shipments available</option>
+                            <option value="__all__">All shipment types</option>
                         </select>
                     </div>
                     <div class="execution-control-stat">
-                        <span class="execution-control-stat-label">Controls Configured</span>
+                        <span class="execution-control-stat-label">Checkpoints Defined</span>
                         <strong class="execution-control-stat-value" id="executionControlsCount">0</strong>
                     </div>
                     <div class="execution-control-stat">
-                        <span class="execution-control-stat-label">Tracker Milestones</span>
+                        <span class="execution-control-stat-label">Stages Covered</span>
                         <strong class="execution-control-stat-value" id="executionMilestoneCount">0</strong>
                     </div>
                 </div>
-                <p class="execution-controls-summary" id="executionControlsSummary">Select a shipment to configure a separate execution-controls register against its tracker milestones.</p>
+                <p class="execution-controls-summary" id="executionControlsSummary">Create a reusable checkpoint library and map each checkpoint to one or more stages.</p>
                 <form class="execution-control-form" id="executionControlForm">
                     <div class="execution-control-form-grid">
                         <div class="execution-control-field">
@@ -1370,8 +1370,8 @@
                     </div>
                     <div class="execution-control-stage-panel">
                         <div class="execution-control-stage-header">
-                            <h4>Mandatory Verification Stage</h4>
-                            <span id="executionStageHint">Select the sales order tracker milestones where this control must be verified.</span>
+                            <h4>Applicable Stages</h4>
+                            <span id="executionStageHint">Select the stages where this checkpoint should apply.</span>
                         </div>
                         <div class="execution-control-stage-list" id="executionVerificationStageList"></div>
                     </div>
@@ -1382,8 +1382,8 @@
                 </form>
                 <div class="execution-controls-list">
                     <div class="execution-controls-list-header">
-                        <h4>Sales Order Execution Controls Register</h4>
-                        <span id="executionControlsListMeta">0 controls</span>
+                        <h4>Checkpoint Definitions</h4>
+                        <span id="executionControlsListMeta">0 checkpoints</span>
                     </div>
                     <div class="execution-controls-cards" id="executionControlsContainer"></div>
                 </div>
@@ -1504,6 +1504,7 @@
         };
 
         let shipments = [];
+        let checkpointDefinitions = [];
         const openAddShipmentBtn = document.getElementById('openAddShipmentBtn');
         const addShipmentModal = document.getElementById('addShipmentModal');
         const addShipmentModalTitle = document.getElementById('addShipmentModalTitle');
@@ -1539,7 +1540,7 @@
         let activeShipmentDraft = null;
         let addPlannerState = null;
         let suppressAddPlannerScrollSync = false;
-        let selectedExecutionShipmentIndex = 0;
+        let selectedExecutionShipmentType = '__all__';
 
         openAddShipmentBtn.addEventListener('click', function () {
             openAddShipmentModal();
@@ -1561,18 +1562,12 @@
             }
         });
         executionShipmentSelect.addEventListener('change', function () {
-            const nextIndex = Number(executionShipmentSelect.value);
-            selectedExecutionShipmentIndex = Number.isNaN(nextIndex) ? 0 : nextIndex;
+            selectedExecutionShipmentType = executionShipmentSelect.value || '__all__';
             editingExecutionControlIndex = null;
             renderExecutionControls();
         });
         executionControlForm.addEventListener('submit', function (event) {
             event.preventDefault();
-
-            const shipment = getSelectedExecutionShipment();
-            if (!shipment) {
-                return;
-            }
 
             const controlType = executionControlType.value;
             const checklistDetails = executionChecklistDetails.value.trim();
@@ -1591,14 +1586,13 @@
             }
 
             if (!verificationStages.length) {
-                alert('Please select at least one verification stage from the sales order tracker milestones.');
+                alert('Please select at least one stage where this checkpoint should apply.');
                 return;
             }
 
-            ensureExecutionControlsCollection(shipment);
             const existingControl = editingExecutionControlIndex === null
                 ? null
-                : shipment.executionControls[editingExecutionControlIndex];
+                : checkpointDefinitions[editingExecutionControlIndex];
             const timestamp = getActivityTimestamp();
             const executionControl = {
                 id: existingControl ? existingControl.id : `CTRL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -1610,9 +1604,9 @@
             };
 
             if (editingExecutionControlIndex === null) {
-                shipment.executionControls.push(executionControl);
+                checkpointDefinitions.push(executionControl);
             } else {
-                shipment.executionControls[editingExecutionControlIndex] = executionControl;
+                checkpointDefinitions[editingExecutionControlIndex] = executionControl;
             }
 
             editingExecutionControlIndex = null;
@@ -1640,21 +1634,7 @@
             const shipment = {
                 id: shipmentId,
                 type: shipmentType,
-                timeline,
-                executionControls: existingShipment && Array.isArray(existingShipment.executionControls)
-                    ? existingShipment.executionControls.map(function (control) {
-                        return {
-                            id: control.id,
-                            type: control.type,
-                            checklistDetails: control.checklistDetails,
-                            verificationStages: Array.isArray(control.verificationStages)
-                                ? control.verificationStages.slice()
-                                : [],
-                            createdAt: control.createdAt || '',
-                            updatedAt: control.updatedAt || ''
-                        };
-                    })
-                    : []
+                timeline
             };
 
             if (editingShipmentIndex === null) {
@@ -2015,12 +1995,6 @@
             }).join('');
         }
 
-        function ensureExecutionControlsCollection(shipment) {
-            if (!Array.isArray(shipment.executionControls)) {
-                shipment.executionControls = [];
-            }
-        }
-
         function getActivityTimestamp() {
             return new Date().toLocaleString(undefined, {
                 year: 'numeric',
@@ -2031,131 +2005,135 @@
             });
         }
 
-        function getSelectedExecutionShipment() {
-            if (!shipments.length) {
-                return null;
-            }
-
-            if (selectedExecutionShipmentIndex < 0 || selectedExecutionShipmentIndex >= shipments.length) {
-                selectedExecutionShipmentIndex = 0;
-            }
-
-            const shipment = shipments[selectedExecutionShipmentIndex] || null;
-            if (shipment) {
-                ensureExecutionControlsCollection(shipment);
-            }
-            return shipment;
+        function getAllUniqueStageNames() {
+            const stageNames = new Set();
+            Object.keys(shipmentTimelines).forEach(function (shipmentType) {
+                (shipmentTimelines[shipmentType] || []).forEach(function (stage) {
+                    stageNames.add(stage.name);
+                });
+            });
+            return Array.from(stageNames);
         }
 
-        function renderVerificationStageChoices(shipment, selectedStages) {
+        function getStageUniverseForContext(shipmentType) {
+            if (shipmentType && shipmentType !== '__all__' && shipmentTimelines[shipmentType]) {
+                return (shipmentTimelines[shipmentType] || []).map(function (stage) {
+                    return stage.name;
+                });
+            }
+
+            return getAllUniqueStageNames();
+        }
+
+        function getAutoAppliedControlsForShipment(shipment) {
+            if (!shipment || !Array.isArray(shipment.timeline)) {
+                return [];
+            }
+
+            const shipmentStages = new Set(shipment.timeline.map(function (stage) {
+                return stage.name;
+            }));
+
+            return checkpointDefinitions
+                .map(function (control) {
+                    const matchingStages = (control.verificationStages || []).filter(function (stageName) {
+                        return shipmentStages.has(stageName);
+                    });
+
+                    if (!matchingStages.length) {
+                        return null;
+                    }
+
+                    return {
+                        id: control.id,
+                        type: control.type,
+                        checklistDetails: control.checklistDetails,
+                        verificationStages: matchingStages,
+                        createdAt: control.createdAt,
+                        updatedAt: control.updatedAt
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        function renderVerificationStageChoices(selectedStages) {
             executionVerificationStageList.innerHTML = '';
 
-            if (!shipment || !shipment.timeline.length) {
-                executionVerificationStageList.innerHTML = '<div class="empty-state">Add tracker milestones to a shipment before mapping execution controls to verification stages.</div>';
-                executionStageHint.textContent = 'No milestones available for verification mapping.';
+            const stages = getStageUniverseForContext(selectedExecutionShipmentType);
+
+            if (!stages.length) {
+                executionVerificationStageList.innerHTML = '<div class="empty-state">No stages are available for this shipment-type context.</div>';
+                executionStageHint.textContent = 'No stages available for mapping.';
                 return;
             }
 
             const selectedStageSet = new Set(selectedStages || []);
-            executionStageHint.textContent = `${shipment.timeline.length} sales order tracker milestones available for verification mapping.`;
-            executionVerificationStageList.innerHTML = shipment.timeline.map(function (stage, index) {
-                const stageDate = parseLocalDate(stage.date);
-                const isChecked = selectedStageSet.has(stage.name) ? 'checked' : '';
+            executionStageHint.textContent = `${stages.length} stage${stages.length === 1 ? '' : 's'} available for mapping in this context.`;
+            executionVerificationStageList.innerHTML = stages.map(function (stageName, index) {
+                const isChecked = selectedStageSet.has(stageName) ? 'checked' : '';
                 return `
                     <label class="stage-choice">
-                        <input type="checkbox" value="${stage.name}" ${isChecked}>
+                        <input type="checkbox" value="${stageName}" ${isChecked}>
                         <span class="stage-choice-details">
-                            <span class="stage-choice-name">${index + 1}. ${stage.name}</span>
-                            <span class="stage-choice-date">${stageDate ? formatDisplayDate(stageDate) : 'Date pending'}</span>
+                            <span class="stage-choice-name">${index + 1}. ${stageName}</span>
+                            <span class="stage-choice-date">Auto-applies to shipments that include this stage.</span>
                         </span>
                     </label>
                 `;
             }).join('');
         }
 
-        function updateExecutionControlFormState(shipment) {
-            const editingControl = shipment && editingExecutionControlIndex !== null
-                ? shipment.executionControls[editingExecutionControlIndex] || null
+        function updateExecutionControlFormState() {
+            const editingControl = editingExecutionControlIndex !== null
+                ? checkpointDefinitions[editingExecutionControlIndex] || null
                 : null;
-
-            executionControlType.disabled = !shipment;
-            executionChecklistDetails.disabled = !shipment;
-            executionControlSubmitBtn.disabled = !shipment;
-            executionControlFormResetBtn.disabled = !shipment;
-
-            if (!shipment) {
-                executionControlType.value = '';
-                executionChecklistDetails.value = '';
-                executionControlSubmitBtn.textContent = 'Add Control';
-                executionControlFormResetBtn.textContent = 'Clear';
-                renderVerificationStageChoices(null, []);
-                return;
-            }
 
             executionControlType.value = editingControl ? editingControl.type : '';
             executionChecklistDetails.value = editingControl ? editingControl.checklistDetails : '';
-            executionControlSubmitBtn.textContent = editingControl ? 'Save Control' : 'Add Control';
+            executionControlSubmitBtn.textContent = editingControl ? 'Save Checkpoint' : 'Add Checkpoint';
             executionControlFormResetBtn.textContent = editingControl ? 'Cancel Edit' : 'Clear';
-            renderVerificationStageChoices(shipment, editingControl ? editingControl.verificationStages : []);
+            renderVerificationStageChoices(editingControl ? editingControl.verificationStages : []);
         }
 
         function renderExecutionControls() {
-            const hasShipments = shipments.length > 0;
-
-            if (!hasShipments) {
-                executionShipmentSelect.innerHTML = '<option value="">No shipments available</option>';
-                executionShipmentSelect.disabled = true;
-                executionContextBadge.textContent = 'No Shipment Selected';
-                executionContextBadge.className = 'execution-context-badge is-empty';
-                executionControlsCount.textContent = '0';
-                executionMilestoneCount.textContent = '0';
-                executionControlsSummary.textContent = 'Add a shipment first, then create a separate register of execution controls against its sales order tracker milestones.';
-                executionControlsListMeta.textContent = '0 controls';
-                executionControlsContainer.innerHTML = '<div class="empty-state">No execution controls available because no shipment or sales order has been added yet.</div>';
-                editingExecutionControlIndex = null;
-                updateExecutionControlFormState(null);
-                return;
-            }
-
-            if (selectedExecutionShipmentIndex < 0 || selectedExecutionShipmentIndex >= shipments.length) {
-                selectedExecutionShipmentIndex = 0;
-            }
-
+            const contextOptions = ['<option value="__all__">All shipment types</option>'].concat(Object.keys(shipmentTimelines).map(function (shipmentType) {
+                return `<option value="${shipmentType}">${shipmentType}</option>`;
+            }));
+            executionShipmentSelect.innerHTML = contextOptions.join('');
             executionShipmentSelect.disabled = false;
-            executionShipmentSelect.innerHTML = shipments.map(function (shipment, index) {
-                return `<option value="${index}">${shipment.id} • ${shipment.type}</option>`;
-            }).join('');
-            executionShipmentSelect.value = String(selectedExecutionShipmentIndex);
 
-            const shipment = getSelectedExecutionShipment();
-            const controls = shipment.executionControls;
+            if (!shipmentTimelines[selectedExecutionShipmentType] && selectedExecutionShipmentType !== '__all__') {
+                selectedExecutionShipmentType = '__all__';
+            }
+            executionShipmentSelect.value = selectedExecutionShipmentType;
+
             const coveredStages = new Set();
-            controls.forEach(function (control) {
+            checkpointDefinitions.forEach(function (control) {
                 (control.verificationStages || []).forEach(function (stageName) {
                     coveredStages.add(stageName);
                 });
             });
 
-            executionContextBadge.textContent = `${shipment.id} • ${shipment.type}`;
+            executionContextBadge.textContent = 'Global Stage Mapping';
             executionContextBadge.className = 'execution-context-badge';
-            executionControlsCount.textContent = String(controls.length);
-            executionMilestoneCount.textContent = String(shipment.timeline.length);
-            executionControlsSummary.textContent = controls.length
-                ? `${controls.length} execution control${controls.length === 1 ? '' : 's'} configured. ${coveredStages.size} tracker milestone${coveredStages.size === 1 ? '' : 's'} currently mapped for mandatory verification.`
-                : 'No execution controls have been added yet for this shipment. Use the form below to create the controls register.';
-            executionControlsListMeta.textContent = `${controls.length} control${controls.length === 1 ? '' : 's'}`;
+            executionControlsCount.textContent = String(checkpointDefinitions.length);
+            executionMilestoneCount.textContent = String(coveredStages.size);
+            executionControlsSummary.textContent = checkpointDefinitions.length
+                ? `${checkpointDefinitions.length} checkpoint definition${checkpointDefinitions.length === 1 ? '' : 's'} configured. They auto-apply to shipment stages based on mapping.`
+                : 'No checkpoint definitions added yet. Create checkpoints and map them to stages to enable automatic shipment application.';
+            executionControlsListMeta.textContent = `${checkpointDefinitions.length} checkpoint${checkpointDefinitions.length === 1 ? '' : 's'}`;
 
-            if (editingExecutionControlIndex !== null && !controls[editingExecutionControlIndex]) {
+            if (editingExecutionControlIndex !== null && !checkpointDefinitions[editingExecutionControlIndex]) {
                 editingExecutionControlIndex = null;
             }
-            updateExecutionControlFormState(shipment);
+            updateExecutionControlFormState();
 
-            if (!controls.length) {
-                executionControlsContainer.innerHTML = '<div class="empty-state">No sales order execution controls have been configured for the selected shipment yet.</div>';
+            if (!checkpointDefinitions.length) {
+                executionControlsContainer.innerHTML = '<div class="empty-state">No checkpoint definitions available yet.</div>';
                 return;
             }
 
-            executionControlsContainer.innerHTML = controls.map(function (control, index) {
+            executionControlsContainer.innerHTML = checkpointDefinitions.map(function (control, index) {
                 const verificationMarkup = (control.verificationStages || []).map(function (stageName) {
                     return `<span class="execution-control-pill">${stageName}</span>`;
                 }).join('');
@@ -2163,7 +2141,7 @@
                     <article class="execution-control-card">
                         <div class="execution-control-card-header">
                             <div>
-                                <div class="execution-control-card-title">${control.type} Control</div>
+                                <div class="execution-control-card-title">${control.type} Checkpoint</div>
                                 <div class="execution-control-card-meta">
                                     <span class="execution-control-pill">Created ${control.createdAt || '-'}</span>
                                     <span class="execution-control-pill">Updated ${control.updatedAt || '-'}</span>
@@ -2176,7 +2154,7 @@
                         </div>
                         <div class="execution-control-details">${control.checklistDetails}</div>
                         <div class="execution-control-verification">
-                            <div class="execution-control-verification-label">To Be Verified At Stage Of Sales Order Execution</div>
+                            <div class="execution-control-verification-label">Mapped Stages</div>
                             <div class="execution-control-verification-list">${verificationMarkup}</div>
                         </div>
                     </article>
@@ -2198,9 +2176,9 @@
             container.innerHTML = '';
 
             shipments.forEach((shipment, index) => {
-                ensureExecutionControlsCollection(shipment);
                 const card = document.createElement('div');
                 card.className = 'shipment-card';
+                const autoAppliedControls = getAutoAppliedControlsForShipment(shipment);
 
                 const timelineHTML = buildTimelineMarkup(shipment.timeline);
                 const parsedDates = shipment.timeline
@@ -2241,7 +2219,7 @@
                     ? Math.round((plannedStageCount / totalStageCount) * 100)
                     : 0;
                 const verificationCoverageCount = new Set(
-                    shipment.executionControls.flatMap(function (control) {
+                    autoAppliedControls.flatMap(function (control) {
                         return Array.isArray(control.verificationStages)
                             ? control.verificationStages
                             : [];
@@ -2258,7 +2236,7 @@
                     </div>
                     <div class="shipment-meta">
                         <span class="shipment-type-pill">${shipment.type}</span>
-                        <span class="execution-count-pill">${shipment.executionControls.length} control${shipment.executionControls.length === 1 ? '' : 's'}</span>
+                        <span class="execution-count-pill">${autoAppliedControls.length} checkpoint${autoAppliedControls.length === 1 ? '' : 's'} auto-applied</span>
                     </div>
                     <div class="shipment-overview-grid">
                         <div class="overview-item">
@@ -2278,8 +2256,8 @@
                             <div class="overview-value">${plannedSpanDays ? formatSpanAsMonthsWeeksDays(plannedSpanDays) : '-'}</div>
                         </div>
                         <div class="overview-item">
-                            <div class="overview-label">Controls Configured</div>
-                            <div class="overview-value">${shipment.executionControls.length}</div>
+                            <div class="overview-label">Auto-Applied Checkpoints</div>
+                            <div class="overview-value">${autoAppliedControls.length}</div>
                         </div>
                         <div class="overview-item">
                             <div class="overview-label">Verification Coverage</div>
@@ -2310,8 +2288,7 @@
         }
 
         function editExecutionControl(index) {
-            const shipment = getSelectedExecutionShipment();
-            if (!shipment || !shipment.executionControls[index]) {
+            if (!checkpointDefinitions[index]) {
                 return;
             }
 
@@ -2320,12 +2297,11 @@
         }
 
         function removeExecutionControl(index) {
-            const shipment = getSelectedExecutionShipment();
-            if (!shipment || !shipment.executionControls[index]) {
+            if (!checkpointDefinitions[index]) {
                 return;
             }
 
-            shipment.executionControls.splice(index, 1);
+            checkpointDefinitions.splice(index, 1);
             if (editingExecutionControlIndex === index) {
                 editingExecutionControlIndex = null;
             } else if (editingExecutionControlIndex !== null && editingExecutionControlIndex > index) {
@@ -2336,9 +2312,6 @@
 
         function removeShipment(index) {
             shipments.splice(index, 1);
-            if (selectedExecutionShipmentIndex >= shipments.length) {
-                selectedExecutionShipmentIndex = Math.max(0, shipments.length - 1);
-            }
             displayShipments();
         }
 
