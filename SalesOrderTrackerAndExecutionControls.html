@@ -982,14 +982,27 @@
         }
         .milestone-chip {
             display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            align-items: flex-start;
             padding: 8px 10px;
             border-radius: 10px;
             border: 1px solid #dbe3f0;
             background-color: #ffffff;
             min-width: 180px;
             flex: 0 0 auto;
+        }
+        .milestone-chip-clickable {
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .milestone-chip-clickable:hover {
+            border-color: #93c5fd;
+            background-color: #f0f7ff;
+        }
+        .milestone-chip-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .milestone-dot {
             width: 9px;
@@ -1006,6 +1019,51 @@
         .milestone-date {
             color: #64748b;
             font-size: 0.8em;
+        }
+        .milestone-checkpoint-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+        .milestone-checkpoint-count {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        .milestone-checkpoint-list {
+            display: none;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #cbd5e1;
+            width: 100%;
+        }
+        .milestone-checkpoint-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .milestone-checkpoint-entry:last-child {
+            border-bottom: none;
+        }
+        .milestone-checkpoint-entry-title {
+            color: #1e3a8a;
+            font-size: 0.78em;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .milestone-checkpoint-entry-detail {
+            color: #475569;
+            font-size: 0.76em;
+            line-height: 1.4;
         }
         .remove-shipment-btn {
             background-color: #ef4444;
@@ -2147,19 +2205,68 @@
             return selectedTimeline;
         }
 
-        function buildTimelineMarkup(stages) {
+        function buildTimelineMarkup(stages, stageCheckpointMap) {
+            stageCheckpointMap = stageCheckpointMap || {};
             return stages.map(function (stage) {
                 const stageDate = parseLocalDate(stage.date);
-                return `
-                    <div class="milestone-chip">
-                        <span class="milestone-dot" aria-hidden="true"></span>
-                        <div>
-                            <div class="milestone-name">${stage.name}</div>
-                            <div class="milestone-date">${stageDate ? formatDisplayDate(stageDate) : 'Date pending'}</div>
+                const stageCheckpoints = stageCheckpointMap[stage.name] || [];
+
+                if (!stageCheckpoints.length) {
+                    return `
+                        <div class="milestone-chip">
+                            <div class="milestone-chip-header">
+                                <span class="milestone-dot" aria-hidden="true"></span>
+                                <div>
+                                    <div class="milestone-name">${stage.name}</div>
+                                    <div class="milestone-date">${stageDate ? formatDisplayDate(stageDate) : 'Date pending'}</div>
+                                </div>
+                            </div>
                         </div>
+                    `;
+                }
+
+                const categoryCounts = stageCheckpoints.reduce(function (acc, control) {
+                    const key = `${control.type}: ${control.category || 'Uncategorized'}`;
+                    acc[key] = (acc[key] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const summaryMarkup = Object.keys(categoryCounts).sort().map(function (key) {
+                    return `<span class="milestone-checkpoint-count">${key} (${categoryCounts[key]})</span>`;
+                }).join('');
+
+                const detailMarkup = stageCheckpoints.map(function (control) {
+                    return `
+                        <div class="milestone-checkpoint-entry">
+                            <div class="milestone-checkpoint-entry-title">${control.type} | ${control.category || 'Uncategorized'}</div>
+                            <div class="milestone-checkpoint-entry-detail">${control.checklistDetails || 'No details provided'}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="milestone-chip milestone-chip-clickable" onclick="toggleMilestoneCheckpoints(this)">
+                        <div class="milestone-chip-header">
+                            <span class="milestone-dot" aria-hidden="true"></span>
+                            <div>
+                                <div class="milestone-name">${stage.name}</div>
+                                <div class="milestone-date">${stageDate ? formatDisplayDate(stageDate) : 'Date pending'}</div>
+                            </div>
+                        </div>
+                        <div class="milestone-checkpoint-summary">${summaryMarkup}</div>
+                        <div class="milestone-checkpoint-list">${detailMarkup}</div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleMilestoneCheckpoints(chipEl) {
+            const list = chipEl.querySelector('.milestone-checkpoint-list');
+            const summary = chipEl.querySelector('.milestone-checkpoint-summary');
+            if (!list) { return; }
+            const isHidden = list.style.display === 'none' || list.style.display === '';
+            list.style.display = isHidden ? 'block' : 'none';
+            if (summary) { summary.style.display = isHidden ? 'none' : 'flex'; }
         }
 
         function getActivityTimestamp() {
@@ -2376,7 +2483,14 @@
                     }).join(' ')
                     : '<span class="execution-count-pill">No checkpoints auto-applied</span>';
 
-                const timelineHTML = buildTimelineMarkup(shipment.timeline);
+                const stageCheckpointMap = {};
+                autoAppliedControls.forEach(function (control) {
+                    (control.verificationStages || []).forEach(function (stageName) {
+                        if (!stageCheckpointMap[stageName]) { stageCheckpointMap[stageName] = []; }
+                        stageCheckpointMap[stageName].push(control);
+                    });
+                });
+                const timelineHTML = buildTimelineMarkup(shipment.timeline, stageCheckpointMap);
                 const parsedDates = shipment.timeline
                     .map(function (stage) {
                         return parseLocalDate(stage.date);
@@ -2893,6 +3007,7 @@
         window.removeExecutionControl = removeExecutionControl;
         window.openCheckpointFromShipment = openCheckpointFromShipment;
         window.openExecutionControlModal = openExecutionControlModal;
+        window.toggleMilestoneCheckpoints = toggleMilestoneCheckpoints;
     </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
