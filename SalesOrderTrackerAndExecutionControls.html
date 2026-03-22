@@ -1325,6 +1325,7 @@
         <section class="content-card">
             <div class="page-actions">
                 <button type="button" class="add-shipment-btn" id="openAddShipmentBtn">Add Shipment</button>
+                <button type="button" class="add-shipment-btn" id="openExecutionControlModalBtn">Checkpoint Definition Library</button>
             </div>
 
             <section class="execution-controls-section" aria-labelledby="executionControlsTitle">
@@ -1336,11 +1337,9 @@
                     <div class="execution-context-badge" id="executionContextBadge">Global Stage Mapping</div>
                 </div>
                 <div class="execution-controls-grid">
-                    <div class="execution-control-field">
-                        <label for="executionShipmentSelect">Shipment Type Stage Context</label>
-                        <select id="executionShipmentSelect">
-                            <option value="__all__">All shipment types</option>
-                        </select>
+                    <div class="execution-control-stat">
+                        <span class="execution-control-stat-label">Definition Mode</span>
+                        <strong class="execution-control-stat-value">Popup</strong>
                     </div>
                     <div class="execution-control-stat">
                         <span class="execution-control-stat-label">Checkpoints Defined</span>
@@ -1352,9 +1351,6 @@
                     </div>
                 </div>
                 <p class="execution-controls-summary" id="executionControlsSummary">Create a reusable checkpoint library and map each checkpoint to one or more stages.</p>
-                <div class="execution-action-row">
-                    <button type="button" class="execution-action-btn start" id="openExecutionControlModalBtn">Add Checkpoint</button>
-                </div>
                 <div class="execution-controls-list">
                     <div class="execution-controls-list-header">
                         <h4>Checkpoint Definitions</h4>
@@ -1448,6 +1444,12 @@
             </div>
             <form class="execution-control-form" id="executionControlForm">
                 <div class="execution-control-form-grid">
+                    <div class="execution-control-field">
+                        <label for="executionShipmentSelect">Shipment Type Stage Context</label>
+                        <select id="executionShipmentSelect">
+                            <option value="__all__">All shipment types</option>
+                        </select>
+                    </div>
                     <div class="execution-control-field">
                         <label for="executionControlType">Type of Execution Control</label>
                         <select id="executionControlType" required>
