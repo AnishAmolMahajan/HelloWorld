@@ -1656,6 +1656,7 @@
         });
         executionControlModalClose.addEventListener('click', closeExecutionControlModal);
         checkpointListModalClose.addEventListener('click', function () {
+            checkpointListModal.classList.remove('open');
             checkpointListModal.setAttribute('aria-hidden', 'true');
         });
 
@@ -1673,6 +1674,12 @@
         optionalStageModal.addEventListener('click', function (event) {
             if (event.target === optionalStageModal) {
                 closeOptionalStageModal();
+            }
+        });
+        checkpointListModal.addEventListener('click', function (event) {
+            if (event.target === checkpointListModal) {
+                checkpointListModal.classList.remove('open');
+                checkpointListModal.setAttribute('aria-hidden', 'true');
             }
         });
         executionShipmentSelect.addEventListener('change', function () {
@@ -2523,6 +2530,7 @@
                 `;
             }).join('');
 
+            checkpointListModal.classList.add('open');
             checkpointListModal.setAttribute('aria-hidden', 'false');
         }
 
@@ -2884,6 +2892,7 @@
         window.editExecutionControl = editExecutionControl;
         window.removeExecutionControl = removeExecutionControl;
         window.openCheckpointFromShipment = openCheckpointFromShipment;
+        window.openExecutionControlModal = openExecutionControlModal;
     </script>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
