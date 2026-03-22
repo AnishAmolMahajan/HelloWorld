@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Quiz Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            background: #f0f0f0;
+        }
+
+        .tower {
+            width: 40%;
+            text-align: center;
+            position: relative;
+        }
+
+        .block {
+            width: 100px;
+            height: 30px;
+            margin: 5px auto;
+            background: #007BFF;
+            border: 2px solid #0056b3;
+        }
+
+        .questions {
+            width: 50%;
+        }
+
+        .question {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .answers button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background: #61b261;
+            color: white;
+        }
+
+        .answers button:hover {
+            background: #4e944e;
+        }
+    </style>
+</head>
+<body>
+    <div class="tower">
+        <div id="towerBlocks"></div>
+    </div>
+    <div class="questions">
+        <div id="question" class="question">Question will appear here</div>
+        <div id="answers" class="answers"></div>
+    </div>
+
+    <audio id="risingSound" src="rising.mp3"></audio>
+    <audio id="crashSound" src="crash.mp3"></audio>
+
+    <script>
+        const questions = [
+            { question: "What is the capital of France?", correct: "Paris", answers: ["Paris", "Berlin", "Madrid"] },
+            { question: "What is 2 + 2?", correct: "4", answers: ["3", "4", "5"] },
+            { question: "What is the largest planet?", correct: "Jupiter", answers: ["Mars", "Earth", "Jupiter"] }
+        ];
+
+        const towerBlocks = document.getElementById('towerBlocks');
+        const questionDiv = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const risingSound = document.getElementById('risingSound');
+        const crashSound = document.getElementById('crashSound');
+
+        let currentQuestionIndex = 0;
+
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionDiv.textContent = currentQuestion.question;
+            answersDiv.innerHTML = '';
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.textContent = answer;
+                button.addEventListener('click', () => checkAnswer(answer));
+                answersDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedAnswer) {
+            const currentQuestion = questions[currentQuestionIndex];
+
+            if (selectedAnswer === currentQuestion.correct) {
+                addBlock();
+                playRisingSound();
+                currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+                loadQuestion();
+            } else {
+                removeBlocks();
+                playCrashSound();
+            }
+        }
+
+        function addBlock() {
+            const block = document.createElement('div');
+            block.className = 'block';
+            towerBlocks.appendChild(block);
+        }
+
+        function removeBlocks() {
+            const blocks = towerBlocks.querySelectorAll('.block');
+            for (let i = 0; i < 2; i++) {
+                if (blocks.length > 0) {
+                    towerBlocks.removeChild(blocks[blocks.length - 1]);
+                }
+            }
+        }
+
+        function playRisingSound() {
+            risingSound.volume = Math.min(1, towerBlocks.children.length * 0.1);
+            risingSound.currentTime = 0;
+            risingSound.play();
+        }
+
+        function playCrashSound() {
+            crashSound.currentTime = 0;
+            crashSound.play();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
