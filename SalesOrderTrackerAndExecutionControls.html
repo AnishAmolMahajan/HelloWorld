@@ -1454,9 +1454,15 @@
                         <label for="executionControlType">Type of Execution Control</label>
                         <select id="executionControlType" required>
                             <option value="">Select control type...</option>
-                            <option value="Commercial">Commercial</option>
-                            <option value="Technical">Technical</option>
-                            <option value="Shipping">Shipping</option>
+                            <option value="COMMERCIAL TERMS">COMMERCIAL TERMS</option>
+                            <option value="TECHNICAL TERMS">TECHNICAL TERMS</option>
+                            <option value="SHIPPING TERMS">SHIPPING TERMS</option>
+                        </select>
+                    </div>
+                    <div class="execution-control-field">
+                        <label for="executionControlCategory">Checkpoint Category</label>
+                        <select id="executionControlCategory" required>
+                            <option value="">Select checkpoint category...</option>
                         </select>
                     </div>
                     <div class="execution-control-field execution-control-field-wide">
@@ -1520,6 +1526,55 @@
             ]
         };
 
+        const checkpointTypeCategoryMap = {
+            'COMMERCIAL TERMS': [
+                'DELIVERY TIME',
+                'PAYMENT TERMS : Letter of Credit',
+                'PAYMENT TERMS : Cash Against Document',
+                'PAYMENT TERMS : TT/Wire Transfer',
+                'PAYMENT TERMS : Open Credit',
+                'PAYMENT TERMS : Advance Payment',
+                'PERFORMANCE BANK GUARANTEE',
+                'LIQUIDATED DAMAGES : Late Delivery',
+                'LIQUIDATED DAMAGES : Documentation',
+                'CONSEQUENTIAL LOSSES/DAMAGES',
+                'WARRANTY AND GUARANTEE',
+                'CHANGE ORDER TERMS',
+                'CANCELLATION CLAUSE',
+                'APPLICABLE LAW AND DISPUTE RESOLUTION'
+            ],
+            'TECHNICAL TERMS': [
+                'TECHNICAL DOCUMENTATION REQUIREMENT',
+                'CERTIFICATION',
+                'LENGTH OF PIPE',
+                'PIPE ENDS',
+                'DIMENSIONAL STANDARDS AND TOLERANCE',
+                'QUANTITY TOLERANCE',
+                'MECHANICAL TESTS AND PROPERTIES',
+                'MARKING ON PRODUCTS',
+                'COLOUR CODING REQUIRMENT',
+                'MANUFACTURER NAME AND ORIGIN',
+                'CHEMICAL COMPOSITION',
+                'MECHANICAL PROPERTIES',
+                'HYDROSTATIC TEST',
+                'FINISH OF END PRODUCT',
+                'QUALITY STANDARDS',
+                'INSPECTION',
+                'PERFORMANCE TESTS',
+                'CRITICAL PROJECT RELATED TECHNICAL DOCUMENTS'
+            ],
+            'SHIPPING TERMS': [
+                'EXPEDITING',
+                'FREE ISSUED MATERIALS BY BUYER',
+                'FREE STORAGE PERIOD',
+                'PACKING AND SHIPPING MARKS',
+                'COMPLIANCE WITH CODES, STANDARDS, LAWS AND GOVERNMENT REGULATIONS',
+                'PRODUCT RELEASE REQUIRMENTS',
+                'DISPATCH OF GOODS',
+                'SHIPPING RELEASE NOTE REQUIRMENTS'
+            ]
+        };
+
         let shipments = [];
         let checkpointDefinitions = [];
         const openAddShipmentBtn = document.getElementById('openAddShipmentBtn');
@@ -1550,6 +1605,7 @@
         const executionControlsSummary = document.getElementById('executionControlsSummary');
         const executionControlForm = document.getElementById('executionControlForm');
         const executionControlType = document.getElementById('executionControlType');
+        const executionControlCategory = document.getElementById('executionControlCategory');
         const executionChecklistDetails = document.getElementById('executionChecklistDetails');
         const executionVerificationStageList = document.getElementById('executionVerificationStageList');
         const executionStageHint = document.getElementById('executionStageHint');
@@ -1597,10 +1653,14 @@
             editingExecutionControlIndex = null;
             renderExecutionControls();
         });
+        executionControlType.addEventListener('change', function () {
+            renderCheckpointCategoryOptions('');
+        });
         executionControlForm.addEventListener('submit', function (event) {
             event.preventDefault();
 
             const controlType = executionControlType.value;
+            const controlCategory = executionControlCategory.value;
             const checklistDetails = executionChecklistDetails.value.trim();
             const verificationStages = Array.from(executionVerificationStageList.querySelectorAll('input:checked')).map(function (input) {
                 return input.value;
@@ -1608,6 +1668,11 @@
 
             if (!controlType) {
                 alert('Please select the type of execution control.');
+                return;
+            }
+
+            if (!controlCategory) {
+                alert('Please select the checkpoint category.');
                 return;
             }
 
@@ -1628,6 +1693,7 @@
             const executionControl = {
                 id: existingControl ? existingControl.id : `CTRL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 type: controlType,
+                category: controlCategory,
                 checklistDetails,
                 verificationStages,
                 createdAt: existingControl ? existingControl.createdAt : timestamp,
@@ -2114,6 +2180,7 @@
                     return {
                         id: control.id,
                         type: control.type,
+                        category: control.category || '',
                         checklistDetails: control.checklistDetails,
                         verificationStages: matchingStages,
                         createdAt: control.createdAt,
@@ -2121,6 +2188,25 @@
                     };
                 })
                 .filter(Boolean);
+        }
+
+        function renderCheckpointCategoryOptions(selectedCategory) {
+            const selectedType = executionControlType.value;
+            const categories = checkpointTypeCategoryMap[selectedType] || [];
+
+            executionControlCategory.innerHTML = ['<option value="">Select checkpoint category...</option>']
+                .concat(categories.map(function (category) {
+                    return `<option value="${category}">${category}</option>`;
+                }))
+                .join('');
+
+            executionControlCategory.disabled = !selectedType;
+
+            if (selectedCategory && categories.includes(selectedCategory)) {
+                executionControlCategory.value = selectedCategory;
+            } else {
+                executionControlCategory.value = '';
+            }
         }
 
         function renderVerificationStageChoices(selectedStages) {
@@ -2156,6 +2242,7 @@
                 : null;
 
             executionControlType.value = editingControl ? editingControl.type : '';
+            renderCheckpointCategoryOptions(editingControl ? editingControl.category : '');
             executionChecklistDetails.value = editingControl ? editingControl.checklistDetails : '';
             renderVerificationStageChoices(editingControl ? editingControl.verificationStages : []);
         }
@@ -2206,7 +2293,7 @@
                     <article class="execution-control-card">
                         <div class="execution-control-card-header">
                             <div>
-                                <div class="execution-control-card-title">${control.type} Checkpoint</div>
+                                <div class="execution-control-card-title">${control.type} | ${control.category || 'Uncategorized'}</div>
                                 <div class="execution-control-card-meta">
                                     <span class="execution-control-pill">Created ${control.createdAt || '-'}</span>
                                     <span class="execution-control-pill">Updated ${control.updatedAt || '-'}</span>
@@ -2244,6 +2331,18 @@
                 const card = document.createElement('div');
                 card.className = 'shipment-card';
                 const autoAppliedControls = getAutoAppliedControlsForShipment(shipment);
+                const checkpointCategoryCounts = autoAppliedControls.reduce(function (accumulator, control) {
+                    const categoryLabel = control.category
+                        ? `${control.type}: ${control.category}`
+                        : (control.type || 'Other');
+                    accumulator[categoryLabel] = (accumulator[categoryLabel] || 0) + 1;
+                    return accumulator;
+                }, {});
+                const checkpointCategorySummary = Object.keys(checkpointCategoryCounts).length
+                    ? Object.keys(checkpointCategoryCounts).map(function (category) {
+                        return `${category}: ${checkpointCategoryCounts[category]}`;
+                    }).join(' | ')
+                    : 'No checkpoints auto-applied';
 
                 const timelineHTML = buildTimelineMarkup(shipment.timeline);
                 const parsedDates = shipment.timeline
@@ -2301,7 +2400,7 @@
                     </div>
                     <div class="shipment-meta">
                         <span class="shipment-type-pill">${shipment.type}</span>
-                        <span class="execution-count-pill">${autoAppliedControls.length} checkpoint${autoAppliedControls.length === 1 ? '' : 's'} auto-applied</span>
+                        <span class="execution-count-pill">${checkpointCategorySummary}</span>
                     </div>
                     <div class="shipment-overview-grid">
                         <div class="overview-item">
